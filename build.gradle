@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'jacoco'
+    id 'maven-publish'
 }
 
 repositories {
@@ -23,8 +24,8 @@ dependencies {
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
-group 'com.bnsf.tk'
-version '1.0.0-SNAPSHOT'
+group 'com.rifftech.temporal'
+version '1.0.0'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -61,3 +62,16 @@ jacocoTestReport {
         html.outputLocation.set(file("$buildDir/reports/jacoco"))
     }
 }
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            from components.java
+//        }
+//    }
+//    repositories {
+//        maven {
+//            name = 'local'
+//            url = uri("${buildDir}/localMaven")
+//        }
+//    }
+//}
