@@ -62,16 +62,16 @@ jacocoTestReport {
         html.outputLocation.set(file("$buildDir/reports/jacoco"))
     }
 }
-//publishing {
-//    publications {
-//        mavenJava(MavenPublication) {
-//            from components.java
-//        }
-//    }
-//    repositories {
-//        maven {
-//            name = 'local'
-//            url = uri("${buildDir}/localMaven")
-//        }
-//    }
-//}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = 'local'
+            url = uri("${buildDir}/localMaven")
+        }
+    }
+}
