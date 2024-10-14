@@ -3,6 +3,7 @@ package com.rifftech.temporal.collections;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 import static com.rifftech.temporal.collections.TemporalRange.FOREVER;
 
 class BaseBiTemporalCollection<T> implements BiTemporalCollection<T> {
-    protected final NavigableMap<BiTemporalRange, T> items = Collections.synchronizedNavigableMap(new TreeMap<>());
+    protected final NavigableMap<BiTemporalRange, T> items = new TreeMap<>(Comparator.reverseOrder());
 
     /**
      * Retrieves an item from the collection that is valid as of the specified valid time and the current transaction time.

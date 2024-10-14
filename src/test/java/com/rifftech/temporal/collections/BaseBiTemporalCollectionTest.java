@@ -521,11 +521,11 @@ abstract class BaseBiTemporalCollectionTest {
         collection.add("Test 3", validTimeRange3);
         Iterator<String> iterator = collection.iterator();
         assertTrue(iterator.hasNext());
-        assertEquals("Test 1", iterator.next());
+        assertEquals("Test 3", iterator.next());
         assertTrue(iterator.hasNext());
         assertEquals("Test 2", iterator.next());
         assertTrue(iterator.hasNext());
-        assertEquals("Test 3", iterator.next());
+        assertEquals("Test 1", iterator.next());
         assertFalse(iterator.hasNext());
     }
 

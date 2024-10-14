@@ -3,6 +3,7 @@ package com.rifftech.temporal.collections;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -11,7 +12,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 class BaseTemporalCollection<T> implements TemporalCollection<T> {
-    protected final NavigableMap<TemporalRange, T> items = Collections.synchronizedNavigableMap(new TreeMap<>());
+    protected final NavigableMap<TemporalRange, T> items = new TreeMap<>(Comparator.reverseOrder());
 
     /**
      * Retrieves the item in the temporal collection that is valid as of a specific point in time.

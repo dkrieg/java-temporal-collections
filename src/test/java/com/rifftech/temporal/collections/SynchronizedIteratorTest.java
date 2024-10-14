@@ -46,6 +46,7 @@ public class SynchronizedIteratorTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testNextWhenNoElementsExistInIterator() {
         Iterator<Integer> iterator = mock(Iterator.class);
         when(iterator.next()).thenThrow(NoSuchElementException.class);
@@ -66,6 +67,7 @@ public class SynchronizedIteratorTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testRemoveWhenNoElementsExistInIterator() {
         Iterator<Integer> iterator = mock(Iterator.class);
         doThrow(IllegalStateException.class).when(iterator).remove();
