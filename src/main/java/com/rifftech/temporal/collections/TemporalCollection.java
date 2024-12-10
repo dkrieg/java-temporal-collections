@@ -4,21 +4,18 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
 
-public interface TemporalCollection<T extends TemporalObject> {
+public interface TemporalCollection<T, V extends TemporalValue<T>> {
+    Optional<V> getAsOfNow();
 
-    default Optional<T> getAsOfNow() {
-        return getAsOf(Instant.now());
-    }
+    Optional<V> getAsOf(Instant validTime);
 
-    Optional<T> getAsOf(Instant validTime);
+    Optional<V> getPriorToNow();
 
-    Collection<T> getInRange(TemporalRange validTimeRange);
+    Optional<V> getPriorTo(Instant validTime);
+
+    Collection<V> getInRange(TemporalRange validTimeRange);
 
     int size();
 
     boolean isEmpty();
-
-    void add(T item);
-
-    void remove(T item);
 }

@@ -1,5 +1,6 @@
 package com.rifftech.temporal.collections;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
@@ -11,21 +12,32 @@ import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = PRIVATE)
-class ImmutableTemporalCollection<T extends TemporalObject> implements TemporalCollection<T> {
-    TemporalCollection<T> delegate;
+final class ImmutableTemporalCollection<T, V extends TemporalValue<T>> implements TemporalCollection<T, V> {
+    @NonNull
+    MutableTemporalCollection<T, V> delegate;
 
     @Override
-    public Optional<T> getAsOfNow() {
+    public Optional<V> getAsOfNow() {
         return delegate.getAsOfNow();
     }
 
     @Override
-    public Optional<T> getAsOf(Instant validTime) {
+    public Optional<V> getAsOf(Instant validTime) {
         return delegate.getAsOf(validTime);
     }
 
     @Override
-    public Collection<T> getInRange(TemporalRange validTimeRange) {
+    public Optional<V> getPriorToNow() {
+        return delegate.getPriorToNow();
+    }
+
+    @Override
+    public Optional<V> getPriorTo(Instant validTime) {
+        return delegate.getPriorTo(validTime);
+    }
+
+    @Override
+    public Collection<V> getInRange(TemporalRange validTimeRange) {
         return delegate.getInRange(validTimeRange);
     }
 
@@ -37,15 +49,5 @@ class ImmutableTemporalCollection<T extends TemporalObject> implements TemporalC
     @Override
     public boolean isEmpty() {
         return delegate.isEmpty();
-    }
-
-    @Override
-    public void add(T item) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void remove(T item) {
-        throw new UnsupportedOperationException();
     }
 }

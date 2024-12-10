@@ -5,8 +5,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Iterator;
-
-import static java.util.Objects.isNull;
+import java.util.regex.Pattern;
 
 /**
  * Represents a range of time defined by a start and an end {@link Instant}.
@@ -26,7 +25,7 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
      */
     public static final TemporalRange FOREVER = new TemporalRange(MIN, MAX);
 
-    private static void validateInstants(Instant start, Instant end) {
+    static void validateInstants(Instant start, Instant end) {
         if (start == null || end == null || !start.isBefore(end)) {
             throw new IllegalArgumentException("Start must be before end and neither can be null.");
         }
@@ -34,8 +33,9 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
 
     public static TemporalRange parse(String text) {
         String[] split = text.split(" to ");
-        if (split.length != 2) {
-            throw new IllegalArgumentException("%s must be formatted as start,end like \"2024-10-30T13:00:00Z to 2024-10-30T14:00:00Z\"".formatted(text));
+        Pattern pattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z");
+        if (split.length != 2 || !pattern.matcher(split[0]).matches() || !pattern.matcher(split[1]).matches()) {
+            throw new IllegalArgumentException("%s must be formatted as 'start to end' like \"2024-10-30T13:00:00Z to 2024-10-30T14:00:00Z\"".formatted(text));
         }
         return new TemporalRange(Instant.parse(split[0]), Instant.parse(split[1]));
     }
@@ -58,13 +58,15 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
      * @return a TemporalRange object from the current instant to the specified end instant
      */
     public static TemporalRange nowUntil(Instant end) {
+        validateNotNull(end, "The end cannot be null.");
         return new TemporalRange(Instant.now(), end);
     }
 
     public static TemporalRange nowUntil(Instant end, ChronoUnit precision) {
+        validateNotNull(end, "The end cannot be null.");
+        validateNotNull(precision, "The precision cannot be null.");
         return new TemporalRange(Instant.now().truncatedTo(precision), end.truncatedTo(precision));
     }
-
 
     /**
      *
@@ -103,10 +105,10 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
      * Creates a TemporalRange starting from the current instant and lasting for a specified duration,
      * truncated to a given precision.
      *
-     * @param duration the duration for which the temporal range should last; must not be null.
+     * @param duration  the duration for which the temporal range should last; must not be null.
      * @param precision the ChronoUnit to which the start and end instants should be truncated; must not be null.
      * @return a TemporalRange object representing the time from now until the specified duration has passed,
-     *         truncated to the given precision.
+     * truncated to the given precision.
      */
     public static TemporalRange nowFor(Duration duration, ChronoUnit precision) {
         validateNotNull(duration, "The duration cannot be null.");
@@ -121,7 +123,7 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
      * Creates a TemporalRange object from the given start and end instants.
      *
      * @param start the starting point in time of the range; must not be null
-     * @param end the ending point in time of the range; must not be null
+     * @param end   the ending point in time of the range; must not be null
      * @return a TemporalRange object from the given start instant to the given end instant
      */
     public static TemporalRange fromTo(Instant start, Instant end) {
@@ -133,8 +135,8 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
     /**
      * Creates a TemporalRange object from the given start and end instants, truncated to the specified precision.
      *
-     * @param start the starting point in time of the range; must not be null.
-     * @param end the ending point in time of the range; must not be null.
+     * @param start     the starting point in time of the range; must not be null.
+     * @param end       the ending point in time of the range; must not be null.
      * @param precision the ChronoUnit to which the start and end instants should be truncated; must not be null.
      * @return a TemporalRange object from the given start instant to the given end instant, truncated to the given precision.
      */
@@ -161,7 +163,7 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
      * Creates a TemporalRange starting from the specified start instant until the current instant,
      * truncated to the specified precision.
      *
-     * @param start the starting point in time of the range; must not be null.
+     * @param start     the starting point in time of the range; must not be null.
      * @param precision the ChronoUnit to which the start and end instants should be truncated; must not be null.
      * @return a TemporalRange object from the specified start instant to the current instant, truncated to the given precision.
      */
@@ -186,10 +188,10 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
      * Creates a TemporalRange with a specified start instant and the maximum possible end instant,
      * both truncated to a given precision.
      *
-     * @param start the starting point in time of the range
+     * @param start     the starting point in time of the range
      * @param precision the ChronoUnit to which the start and end instants should be truncated
      * @return a TemporalRange object from the specified start instant to the maximum possible end instant,
-     *         truncated to the given precision
+     * truncated to the given precision
      */
     public static TemporalRange fromToMax(Instant start, ChronoUnit precision) {
         validateNotNull(start, "The start cannot be null.");
@@ -222,7 +224,6 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
         return isContiguous;
     }
 
-    
     /**
      * Adds the specified duration to both the start and end instants of this TemporalRange.
      *
@@ -235,7 +236,6 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
         return new TemporalRange(start.plus(duration), end.plus(duration));
     }
 
-    
     /**
      * Returns a new TemporalRange by subtracting the specified duration from the start and end points of this range.
      *
@@ -293,51 +293,120 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
         return this.start.isAfter(other.end);
     }
 
+    /**
+     * Checks if the current temporal range meets the specified temporal range
+     * by verifying whether the end of this range is equal to the start of the other range.
+     *
+     * @param other the TemporalRange to compare with. Must not be null.
+     * @return true if the end of this range equals the start of the other range, false otherwise.
+     */
     public boolean meets(TemporalRange other) {
         validateNotNull(other, "The other range cannot be null.");
         return this.end.equals(other.start);
     }
 
+    /**
+     * Checks if the current temporal range is met by the specified other temporal range.
+     *
+     * @param other the other temporal range to compare against, must not be null
+     * @return true if the start of this temporal range equals the end of the specified other range, false otherwise
+     */
     public boolean isMetBy(TemporalRange other) {
         validateNotNull(other, "The other range cannot be null.");
         return this.start.equals(other.end);
     }
 
+    /**
+     * Checks if the current temporal range overlaps with another temporal range before its start.
+     *
+     * @param other the temporal range to compare with; must not be null
+     * @return true if the current range starts before the other range and contains its end, false otherwise
+     */
     public boolean overlapsBefore(TemporalRange other) {
         validateNotNull(other, "The other range cannot be null.");
         return this.start.isBefore(other.start) && this.contains(other.end);
     }
 
+    /**
+     * Determines if this TemporalRange overlaps with another TemporalRange after the other range's start and end points.
+     *
+     * @param other the other TemporalRange to compare against; must not be null
+     * @return true if this TemporalRange ends after the other TemporalRange and contains the other's start, false otherwise
+     */
     public boolean overlapsAfter(TemporalRange other) {
         validateNotNull(other, "The other range cannot be null.");
         return this.end.isAfter(other.end) && this.contains(other.start);
     }
 
+    /**
+     * Determines if the current temporal range finishes another specified temporal range.
+     * This method checks if the start of the current range is after the start of the
+     * specified range and if the end of both ranges are equal.
+     *
+     * @param other the temporal range to compare with; must not be null
+     * @return true if the current range finishes the specified range, false otherwise
+     */
     public boolean finishes(TemporalRange other) {
         validateNotNull(other, "The other range cannot be null.");
         return this.start.isAfter(other.start) && this.end.equals(other.end);
     }
 
+    /**
+     * Determines if the current TemporalRange is finished by the specified TemporalRange.
+     * A TemporalRange is considered to be finished by another if its start is before the other range's start
+     * and its end is equal to the other range's end.
+     *
+     * @param other the TemporalRange to compare against; must not be null
+     * @return true if the current TemporalRange is finished by the specified TemporalRange, otherwise false
+     */
     public boolean isFinishedBy(TemporalRange other) {
         validateNotNull(other, "The other range cannot be null.");
-        return this.start.isBefore(other.start) && this.start.equals(other.start);
+        return this.start.isBefore(other.start) && this.end.equals(other.end);
     }
 
+    /**
+     * Determines if the current temporal range completely includes the specified temporal range.
+     *
+     * @param other the temporal range to check if it is included within this range; must not be null
+     * @return true if the current temporal range includes the specified range, false otherwise
+     */
     public boolean includes(TemporalRange other) {
         validateNotNull(other, "The other range cannot be null.");
         return this.start.isBefore(other.start) && this.end.isAfter(other.end);
     }
 
+    /**
+     * Determines if the current temporal range is entirely within the specified temporal range.
+     *
+     * @param other the temporal range to compare with; must not be null
+     * @return true if the current range starts after the start of the provided range
+     *         and ends before the end of the provided range; false otherwise
+     */
     public boolean isDuring(TemporalRange other) {
         validateNotNull(other, "The other range cannot be null.");
         return this.start.isAfter(other.start) && this.end.isBefore(other.end);
     }
 
+    /**
+     * Determines if the current temporal range starts with the same start time as the
+     * specified temporal range, but ends before the specified temporal range ends.
+     *
+     * @param other the temporal range to compare with, must not be null
+     * @return true if the current range starts at the same time as the specified range
+     *         and ends before the specified range ends, false otherwise
+     */
     public boolean starts(TemporalRange other) {
         validateNotNull(other, "The other range cannot be null.");
         return this.end.isBefore(other.end) && this.start.equals(other.start);
     }
 
+    /**
+     * Determines if this temporal range is started by the specified temporal range.
+     *
+     * @param other The temporal range to compare with, must not be null.
+     * @return true if this temporal range is started by the specified temporal range;
+     *         false otherwise.
+     */
     public boolean isStartedBy(TemporalRange other) {
         validateNotNull(other, "The other range cannot be null.");
         return this.end.isAfter(other.end) && this.start.equals(other.start);
@@ -345,7 +414,7 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
 
     /**
      * Checks if this TemporalRange is contiguous with another TemporalRange.
-     * Two ranges are considered contiguous if this {@link #meets(TemporalRange)} or {@link #isMetBy(TemporalRange)} 
+     * Two ranges are considered contiguous if this {@link #meets(TemporalRange)} or {@link #isMetBy(TemporalRange)}
      * other range
      *
      * @param other the TemporalRange to check for contiguity; can be null.
@@ -378,6 +447,14 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
         return this.overlapsBefore(other) || this.overlapsAfter(other);
     }
 
+    /**
+     * Adjusts the precision of the TemporalRange to the specified {@code precision}.
+     *
+     * @param precision the {@code ChronoUnit} to which the start and end times of the range
+     *                  will be truncated; must not be null
+     * @return a new {@code TemporalRange} instance with the start and end times truncated
+     *         to the specified precision
+     */
     public TemporalRange withPrecision(ChronoUnit precision) {
         validateNotNull(precision, "The precision cannot be null.");
         return new TemporalRange(start.truncatedTo(precision), end.truncatedTo(precision));

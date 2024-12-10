@@ -2,22 +2,22 @@ package com.rifftech.temporal.collections;
 
 import java.time.Instant;
 
-public record BiTemporalRange(TemporalRange validTimeRange,
-                              TemporalRange transactionTimeRange) implements Comparable<BiTemporalRange> {
+public record BiTemporalRange(TemporalRange validTemporalRange,
+                              TemporalRange transactionTemporalRange) implements Comparable<BiTemporalRange> {
     @Override
     public int compareTo(BiTemporalRange other) {
-        int validTimeComparison = this.validTimeRange.compareTo(other.validTimeRange);
+        int validTimeComparison = this.validTemporalRange.compareTo(other.validTemporalRange);
         if (validTimeComparison != 0) {
             return validTimeComparison;
         }
-        return this.transactionTimeRange.compareTo(other.transactionTimeRange);
+        return this.transactionTemporalRange.compareTo(other.transactionTemporalRange);
     }
 
     public boolean overlaps(BiTemporalRange range) {
-        return validTimeRange.overlaps(range.validTimeRange) && transactionTimeRange.overlaps(range.transactionTimeRange);
+        return validTemporalRange.overlaps(range.validTemporalRange) && transactionTemporalRange.overlaps(range.transactionTemporalRange);
     }
 
     public boolean isValidAt(Instant validTime, Instant transactionTime) {
-        return validTimeRange.contains(validTime) && transactionTimeRange.contains(transactionTime);
+        return validTemporalRange.contains(validTime) && transactionTemporalRange.contains(transactionTime);
     }
 }
