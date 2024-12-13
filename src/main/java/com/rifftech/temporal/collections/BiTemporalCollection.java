@@ -7,6 +7,13 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Represents a bi-temporal collection that maintains a set of values, each associated
+ * with both a valid time range and a transaction time range. This implementation allows
+ * operations to manage and query data with two time dimensions.
+ *
+ * @param <T> the type of value stored within the bi-temporal collection
+ */
 public class BiTemporalCollection<T> implements MutableBiTemporalCollection<T> {
     BusinessTemporalCollection<SystemTemporalCollection<T>> items = new BusinessTemporalCollection<>();
 
@@ -87,22 +94,7 @@ public class BiTemporalCollection<T> implements MutableBiTemporalCollection<T> {
                         .map(v2 -> biTemporalValue(v1.validTemporalRange(), v2.validTemporalRange(), v2.value())));
     }
 
-    /**
-     * Retrieves the BiTemporalValue associated with the time combination
-     * that immediately precedes the given validTime and transactionTime.
-     * @see #getPriorTo(Instant, Instant)
-     *
-     * @param validTime the valid time used as a reference point for the lookup.
-     *                  This indicates the effective date of the value.
-     * @param transactionTime the transaction time used as a reference point for the lookup.
-     *                        This indicates when the value was recorded or changed.
-     * @return an Optional containing the BiTemporalValue found prior to the given validTime and transactionTime,
-     *         or an empty Optional if no such value exists.
-     */
-    public Optional<BiTemporalValue<T>> getPriorToAsOf(Instant validTime, Instant transactionTime) {
-        return getPriorTo(validTime, transactionTime);
-    }
-
+    @Override
     public Optional<BiTemporalValue<T>> getPriorToPriorTo(Instant validTime, Instant transactionTime) {
         return items.getPriorTo(validTime)
                 .flatMap(v1 -> v1.value()

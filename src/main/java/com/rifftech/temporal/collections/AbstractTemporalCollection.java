@@ -15,6 +15,23 @@ import static com.rifftech.temporal.collections.TemporalRange.fromTo;
 import static com.rifftech.temporal.collections.TemporalRange.fromToMax;
 import static lombok.AccessLevel.PRIVATE;
 
+/**
+ * Abstract base class for managing a collection of temporal values, where each value is
+ * associated with a defined temporal range. This class provides basic functionality for
+ * adding, expiring, and retrieving temporal values based on their validity period.
+ *
+ * The collection maintains the temporal values using a {@link NavigableMap}, with {@link Instant}
+ * as keys representing the moments when values become effective or expire and the actual values
+ * stored as {@code Optional<T>}. This implementation allows efficient querying and manipulation
+ * of temporal values.
+ *
+ * This class is abstract and requires subclass implementation for the method to create
+ * domain-specific temporal value representations.
+ *
+ * @param <T> The type of the value stored within the collection.
+ * @param <V> The type of the temporal value, extending {@link TemporalValue}, representing the
+ *            value and its associated temporal range.
+ */
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 abstract class AbstractTemporalCollection<T, V extends TemporalValue<T>> implements MutableTemporalCollection<T, V> {
     NavigableMap<Instant, Optional<T>> items = new ConcurrentSkipListMap<>();
