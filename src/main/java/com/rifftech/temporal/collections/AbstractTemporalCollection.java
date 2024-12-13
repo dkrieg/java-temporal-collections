@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.function.BiFunction;
 
 import static com.rifftech.temporal.collections.TemporalRange.fromTo;
 import static com.rifftech.temporal.collections.TemporalRange.fromToMax;
@@ -24,13 +25,13 @@ abstract class AbstractTemporalCollection<T, V extends TemporalValue<T>> impleme
     }
 
     @Override
-    public void expireAsOfNow()  {
+    public void expireAsOfNow() {
         expireAsOf(Instant.now());
     }
 
     @Override
-    public void effectiveAsOf(@NonNull Instant asOf, @NonNull T item) {
-        items.put(asOf, Optional.of(item));
+    public void effectiveAsOf(@NonNull Instant validTime, @NonNull T item) {
+        items.put(validTime, Optional.of(item));
     }
 
     @Override
@@ -88,6 +89,10 @@ abstract class AbstractTemporalCollection<T, V extends TemporalValue<T>> impleme
     @Override
     public boolean isEmpty() {
         return items.isEmpty();
+    }
+
+    Optional<T> compute(Instant validTime, BiFunction<Instant, Optional<T>, Optional<T>> mappingFunction) {
+        return items.compute(validTime, mappingFunction);
     }
 
     protected abstract V temporalValue(@NonNull TemporalRange validTemporalRange, @NonNull T value);
