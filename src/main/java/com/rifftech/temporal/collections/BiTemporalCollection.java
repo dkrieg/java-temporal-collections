@@ -5,134 +5,118 @@ import lombok.NonNull;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import static com.rifftech.temporal.collections.TemporalRange.FOREVER;
+import static com.rifftech.temporal.collections.TemporalRange.nowUntilMax;
 
 /**
- * Represents a bi-temporal collection that maintains a set of values, each associated
- * with both a valid time range and a transaction time range. This implementation allows
- * operations to manage and query data with two time dimensions.
+ * An interface representing a collection of bi-temporal values. A bi-temporal value is associated
+ * with both a valid time and a transaction time. This collection provides mechanisms to query
+ * values based on these two temporal dimensions.
  *
- * @param <T> the type of value stored within the bi-temporal collection
+ * @param <T> the type of the value stored within the bi-temporal elements
  */
-public class BiTemporalCollection<T> implements MutableBiTemporalCollection<T> {
-    BusinessTemporalCollection<SystemTemporalCollection<T>> items = new BusinessTemporalCollection<>();
-
-    @Override
-    public void effectiveAsOfNow(@NonNull T item) {
-        effectiveAsOf(Instant.now(), item);
+public interface BiTemporalCollection<T> {
+    /**
+     * Retrieves the temporal value that is currently valid as of the present moment,
+     * if such a value exists.
+     *
+     * @return an {@code Optional} containing the value valid at the present moment,
+     *         or an empty {@code Optional} if no such value exists.
+     */
+    default Optional<BiTemporalRecord<T>> getAsOfNow() {
+        return getAsOf(Instant.now());
     }
 
-    @Override
-    public void effectiveAsOf(@NonNull Instant validTime, @NonNull T item) {
-        items.compute(validTime, (t, n) -> Optional.ofNullable(n)
-                        .orElseGet(() -> Optional.of(new SystemTemporalCollection<>())))
-                .ifPresent(c -> c.effectiveAsOfNow(item));
+    /**
+     * Retrieves the temporal value that was valid at the specified point in time, if such a value exists.
+     *
+     * @param validTime the point in time for which to retrieve the valid temporal value.
+     *                  This parameter must not be null.
+     * @return an {@code Optional} containing the value valid at the specified time,
+     *         or an empty {@code Optional} if no such value exists at that time.
+     */
+    default Optional<BiTemporalRecord<T>> getAsOf(@NonNull Instant validTime) {
+        return getAsOf(validTime, Instant.now());
     }
 
-    @Override
-    public void effectiveAsOf(@NonNull Instant validTime, @NonNull Instant transactionTime, @NonNull T item) {
-        items.compute(validTime, (t, n) -> Optional.ofNullable(n)
-                        .orElseGet(() -> Optional.of(new SystemTemporalCollection<>())))
-                .ifPresent(c -> c.effectiveAsOf(transactionTime, item));
+    /**
+     * Retrieves the value associated with the specified combination of valid time and transaction time,
+     * if such a value exists.
+     *
+     * @param validTime the point in time representing the validity of the value. This parameter must not be null.
+     * @param transactionTime the point in time representing the transaction time of the value. This parameter must not be null.
+     * @return an {@code Optional} containing the value corresponding to the specified valid time and transaction time,
+     *         or an empty {@code Optional} if no such value exists.
+     */
+    Optional<BiTemporalRecord<T>> getAsOf(@NonNull Instant validTime, @NonNull Instant transactionTime);
+
+    /**
+     * Retrieves the temporal value that was valid immediately prior to the present moment,
+     * if such a value exists.
+     *
+     * @return an {@code Optional} containing the most recent value that was valid prior to now,
+     *         or an empty {@code Optional} if no such value exists.
+     */
+    default Optional<BiTemporalRecord<T>> getPriorToNow() {
+        return getPriorTo(Instant.now());
     }
 
-    @Override
-    public void expireAsOfNow() {
-        expireAsOf(Instant.now());
+    /**
+     * Retrieves the temporal value that was valid immediately prior to the specified point in time,
+     * if such a value exists.
+     *
+     * @param validTime the point in time for which to retrieve the most recent temporal value
+     *                  that was valid before it. This parameter must not be null.
+     * @return an {@code Optional} containing the most recent value that was valid before
+     *         the specified time, or an empty {@code Optional} if no such value exists.
+     */
+    default Optional<BiTemporalRecord<T>> getPriorTo(@NonNull Instant validTime) {
+        return getPriorTo(validTime, Instant.now());
     }
 
-    @Override
-    public void expireAsOf(@NonNull Instant expireAt) {
-        items.expireAsOf(expireAt);
-    }
+    /**
+     * Retrieves the bi-temporal value that was valid immediately prior to the specified combination
+     * of valid time and transaction time, if such a value exists.
+     *
+     * @param validTime the point in time representing the validity of the value. This parameter must not be null.
+     * @param transactionTime the point in time representing the transaction time of the value. This parameter must not be null.
+     * @return an {@code Optional} containing the bi-temporal value that was valid prior to the specified valid
+     *         time and transaction time, or an empty {@code Optional} if no such value exists.
+     */
+    Optional<BiTemporalRecord<T>> getPriorTo(@NonNull Instant validTime, @NonNull Instant transactionTime);
 
-    @Override
-    public Optional<BiTemporalValue<T>> getAsOfNow() {
-        return items.getAsOfNow()
-                .flatMap(v1 -> v1.value()
-                        .getAsOfNow()
-                        .map(v2 -> biTemporalValue(v1.validTemporalRange(), v2.validTemporalRange(), v2.value())));
-    }
+    /**
+     * Retrieves a collection of temporal values that are valid within the specified temporal range.
+     *
+     * @param validRange the range of time for which to retrieve the valid temporal values.
+     *                       This parameter must not be null.
+     * @return a collection of temporal values that are valid within the specified range.
+     * If no such values exist, an empty collection is returned.
+     */
+    Collection<BiTemporalRecord<T>> getInRange(@NonNull TemporalRange validRange);
 
-    @Override
-    public Optional<BiTemporalValue<T>> getAsOf(Instant validTime) {
-        return items.getAsOf(validTime)
-                .flatMap(v1 -> v1.value()
-                        .getAsOfNow()
-                        .map(v2 -> biTemporalValue(v1.validTemporalRange(), v2.validTemporalRange(), v2.value())));
-    }
+    /**
+     * Retrieves a collection of bi-temporal values that intersect the specified ranges of valid time
+     * and transaction time.
+     *
+     * @param validRange the range of valid time to filter the bi-temporal values. This range must not be null.
+     * @param transactionRange the range of transaction time to filter the bi-temporal values. This range must not be null.
+     * @return a collection of bi-temporal values that overlap with the specified valid and transaction time ranges.
+     */
+    Collection<BiTemporalRecord<T>> getInRange(@NonNull TemporalRange validRange, @NonNull TemporalRange transactionRange);
 
-    @Override
-    public Optional<BiTemporalValue<T>> getAsOf(Instant validTime, Instant transactionTime) {
-        return items.getAsOf(validTime)
-                .flatMap(v1 -> v1.value()
-                        .getAsOf(transactionTime)
-                        .map(v2 -> biTemporalValue(v1.validTemporalRange(), v2.validTemporalRange(), v2.value())));
-    }
+    /**
+     * Returns the number of temporal values currently stored in the collection.
+     *
+     * @return the number of temporal values in the collection
+     */
+    int size();
 
-    @Override
-    public Optional<BiTemporalValue<T>> getPriorToNow() {
-        return items.getPriorToNow()
-                .flatMap(v1 -> v1.value()
-                        .getAsOfNow()
-                        .map(v2 -> biTemporalValue(v1.validTemporalRange(), v2.validTemporalRange(), v2.value())));
-    }
-
-    @Override
-    public Optional<BiTemporalValue<T>> getPriorTo(Instant validTime) {
-        return items.getPriorTo(validTime)
-                .flatMap(v1 -> v1.value()
-                        .getAsOfNow()
-                        .map(v2 -> biTemporalValue(v1.validTemporalRange(), v2.validTemporalRange(), v2.value())));
-    }
-
-    @Override
-    public Optional<BiTemporalValue<T>> getPriorTo(Instant validTime, Instant transactionTime) {
-        return items.getPriorTo(validTime)
-                .flatMap(v1 -> v1.value()
-                        .getAsOf(transactionTime)
-                        .map(v2 -> biTemporalValue(v1.validTemporalRange(), v2.validTemporalRange(), v2.value())));
-    }
-
-    @Override
-    public Optional<BiTemporalValue<T>> getPriorToPriorTo(Instant validTime, Instant transactionTime) {
-        return items.getPriorTo(validTime)
-                .flatMap(v1 -> v1.value()
-                        .getPriorTo(transactionTime)
-                        .map(v2 -> biTemporalValue(v1.validTemporalRange(), v2.validTemporalRange(), v2.value())));
-    }
-
-    @Override
-    public Collection<BiTemporalValue<T>> getInRange(TemporalRange validTimeRange) {
-        return items.getInRange(validTimeRange)
-                .stream()
-                .map(v1 -> v1.value().getAsOfNow().map(v2 -> biTemporalValue(v1.validTemporalRange(), v2.validTemporalRange(), v2.value())))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Collection<BiTemporalValue<T>> getInRange(TemporalRange validTimeRange, TemporalRange transactionTimeRange) {
-        return items.getInRange(validTimeRange)
-                .stream()
-                .flatMap(v1 -> v1.value().getInRange(transactionTimeRange)
-                        .stream()
-                        .map(v2 -> biTemporalValue(v1.validTemporalRange(), v2.validTemporalRange(), v2.value())))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public int size() {
-        return items.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return items.isEmpty();
-    }
-
-    BiTemporalValue<T> biTemporalValue(TemporalRange validTimeRange, TemporalRange transactionTimeRange, T value) {
-        return new BiTemporalValue<>(validTimeRange, transactionTimeRange, value);
-    }
+    /**
+     * Checks if the collection is empty, meaning it contains no temporal values.
+     *
+     * @return true if the collection has no temporal values; false otherwise
+     */
+    boolean isEmpty();
 }

@@ -4,228 +4,246 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.rifftech.temporal.collections.TemporalRange.FOREVER;
+import static com.rifftech.temporal.collections.TemporalRange.MAX;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-class ImmutableTemporalCollectionTest {
+
+final class ImmutableTemporalCollectionTest {
 
     @Test
-    void testGetAsOfNow_presentValue_case() {
+    void getAsOfNow_returnsDelegateValue() {
         // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-
-        TemporalValue<Integer> expectedValue = Mockito.mock(TemporalValue.class);
-        when(mutableTemporalCollectionMock.getAsOfNow()).thenReturn(Optional.of(expectedValue));
+        TemporalRecord<String> record1 = new TemporalRecord<>(new TemporalRange(Instant.now(), MAX), "record");
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.getAsOfNow()).thenReturn(Optional.of(record1));
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
 
         // Act
-        Optional<TemporalValue<Integer>> result = immutableTemporalCollection.getAsOfNow();
+        Optional<TemporalRecord<String>> result = immutableTemporalCollection.getAsOfNow();
 
         // Assert
-        assertEquals(Optional.of(expectedValue), result);
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(record1);
     }
 
     @Test
-    void testGetAsOfNow_absentValue_case() {
+    void getAsOfNow_returnsEmptyWhenNoDelegateValue() {
         // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-
-        when(mutableTemporalCollectionMock.getAsOfNow()).thenReturn(Optional.empty());
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.getAsOfNow()).thenReturn(Optional.empty());
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
 
         // Act
-        Optional<TemporalValue<Integer>> result = immutableTemporalCollection.getAsOfNow();
+        Optional<TemporalRecord<String>> result = immutableTemporalCollection.getAsOfNow();
 
         // Assert
-        assertEquals(Optional.empty(), result);
+        assertThat(result).isEmpty();
     }
 
     @Test
-    void testGetAsOf_presentValue_case() {
+    void getAsOf_returnsDelegateValue() {
         // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-        TemporalValue<Integer> expectedValue = Mockito.mock(TemporalValue.class);
-        Instant testInstant = Instant.now();
-        when(mutableTemporalCollectionMock.getAsOf(testInstant)).thenReturn(Optional.of(expectedValue));
+        Instant now = Instant.now();
+        TemporalRecord<String> record1 = new TemporalRecord<>(new TemporalRange(now, MAX), "record");
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.getAsOf(now)).thenReturn(Optional.of(record1));
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
 
         // Act
-        Optional<TemporalValue<Integer>> result = immutableTemporalCollection.getAsOf(testInstant);
+        Optional<TemporalRecord<String>> result = immutableTemporalCollection.getAsOf(now);
 
         // Assert
-        assertEquals(Optional.of(expectedValue), result);
+        assertThat(result).isPresent().hasValue(record1);
     }
 
     @Test
-    void testGetAsOf_absentValue_case() {
+    void getAsOf_returnsEmptyWhenNoDelegateValue() {
         // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-        Instant testInstant = Instant.now();
-        when(mutableTemporalCollectionMock.getAsOf(testInstant)).thenReturn(Optional.empty());
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.getAsOf(Instant.now())).thenReturn(Optional.empty());
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
 
         // Act
-        Optional<TemporalValue<Integer>> result = immutableTemporalCollection.getAsOf(testInstant);
+        Optional<TemporalRecord<String>> result = immutableTemporalCollection.getAsOf(Instant.now());
 
         // Assert
-        assertEquals(Optional.empty(), result);
-        assertEquals(Optional.empty(), result);
+        assertThat(result).isEmpty();
     }
 
     @Test
-    void testGetPriorToNow_presentValue_case() {
-        // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-
-        TemporalValue<Integer> expectedValue = Mockito.mock(TemporalValue.class);
-        when(mutableTemporalCollectionMock.getPriorToNow()).thenReturn(Optional.of(expectedValue));
-
-        // Act
-        Optional<TemporalValue<Integer>> result = immutableTemporalCollection.getPriorToNow();
-
-        // Assert
-        assertEquals(Optional.of(expectedValue), result);
+    void getAsOf_WhenUsingNull() {
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
+        assertThatNullPointerException().isThrownBy(() -> immutableTemporalCollection.getAsOf(null));
     }
 
     @Test
-    void testGetPriorToNow_absentValue_case() {
-        // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-
-        when(mutableTemporalCollectionMock.getPriorToNow()).thenReturn(Optional.empty());
-
-        // Act
-        Optional<TemporalValue<Integer>> result = immutableTemporalCollection.getPriorToNow();
-
-        // Assert
-        assertEquals(Optional.empty(), result);
+    void getPriorTo_WhenUsingNull() {
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
+        assertThatNullPointerException().isThrownBy(() -> immutableTemporalCollection.getPriorTo(null));
     }
 
     @Test
-    void testGetPriorTo_presentValue_case() {
-        // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-        TemporalValue<Integer> expectedValue = Mockito.mock(TemporalValue.class);
-        Instant testInstant = Instant.now();
-        when(mutableTemporalCollectionMock.getPriorTo(testInstant)).thenReturn(Optional.of(expectedValue));
-
-        // Act
-        Optional<TemporalValue<Integer>> result = immutableTemporalCollection.getPriorTo(testInstant);
-
-        // Assert
-        assertEquals(Optional.of(expectedValue), result);
+    void getInRange_WhenUsingNull() {
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
+        assertThatNullPointerException().isThrownBy(() -> immutableTemporalCollection.getInRange(null));
     }
 
     @Test
-    void testGetPriorTo_absentValue_case() {
+    void getPriorToNow_returnsDelegateValue() {
         // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-        Instant testInstant = Instant.now();
-        when(mutableTemporalCollectionMock.getPriorTo(testInstant)).thenReturn(Optional.empty());
+        TemporalRecord<String> record1 = new TemporalRecord<>(new TemporalRange(Instant.now(), MAX), "record");
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.getPriorToNow()).thenReturn(Optional.of(record1));
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
 
         // Act
-        Optional<TemporalValue<Integer>> result = immutableTemporalCollection.getPriorTo(testInstant);
+        Optional<TemporalRecord<String>> result = immutableTemporalCollection.getPriorToNow();
 
         // Assert
-        assertEquals(Optional.empty(), result);
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(record1);
     }
 
     @Test
-    void testGetInRange_presentValue_case() {
+    void getPriorToNow_returnsEmptyWhenNoDelegateValue() {
         // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-        TemporalValue<Integer> expectedValue = Mockito.mock(TemporalValue.class);
-        TemporalRange temporalRange = new TemporalRange(Instant.now(), Instant.now().plusSeconds(60));
-        Collection<TemporalValue<Integer>> expectedCollection = new ArrayList<>();
-        expectedCollection.add(expectedValue);
-        when(mutableTemporalCollectionMock.getInRange(temporalRange)).thenReturn(expectedCollection);
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.getPriorToNow()).thenReturn(Optional.empty());
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
 
         // Act
-        Collection<TemporalValue<Integer>> resultCollection = immutableTemporalCollection.getInRange(temporalRange);
+        Optional<TemporalRecord<String>> result = immutableTemporalCollection.getPriorToNow();
 
         // Assert
-        assertEquals(expectedCollection, resultCollection);
+        assertThat(result).isEmpty();
     }
 
     @Test
-    void testGetInRange_absentValue_case() {
+    void getPriorTo_returnsDelegateValue() {
         // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-        TemporalRange temporalRange = new TemporalRange(Instant.now(), Instant.now().plusSeconds(60));
-        when(mutableTemporalCollectionMock.getInRange(temporalRange)).thenReturn(new ArrayList<>());
+        Instant now = Instant.now();
+        TemporalRecord<String> record1 = new TemporalRecord<>(new TemporalRange(now, MAX), "record");
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.getPriorTo(now)).thenReturn(Optional.of(record1));
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
 
         // Act
-        Collection<TemporalValue<Integer>> resultCollection = immutableTemporalCollection.getInRange(temporalRange);
+        Optional<TemporalRecord<String>> result = immutableTemporalCollection.getPriorTo(now);
 
         // Assert
-        assertTrue(resultCollection.isEmpty());
+        assertThat(result).isPresent();
     }
 
     @Test
-    void testSize_nonEmptyCollection_case() {
+    void getPriorTo_returnsEmptyWhenNoDelegateValue() {
         // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-        when(mutableTemporalCollectionMock.size()).thenReturn(5);
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.getPriorTo(Instant.now())).thenReturn(Optional.empty());
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
 
         // Act
-        int size = immutableTemporalCollection.size();
+        Optional<TemporalRecord<String>> result = immutableTemporalCollection.getPriorTo(Instant.now());
 
         // Assert
-        assertEquals(5, size);
+        assertThat(result).isEmpty();
     }
 
     @Test
-    void testSize_emptyCollection_case() {
+    void getInRange_returnsDelegateValues() {
         // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-        when(mutableTemporalCollectionMock.size()).thenReturn(0);
+        Instant now = Instant.now();
+        TemporalRecord<String> record1 = new TemporalRecord<>(new TemporalRange(now.minusSeconds(5), now), "record1");
+        TemporalRecord<String> record2 = new TemporalRecord<>(new TemporalRange(now, MAX), "record2");
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.getInRange(any())).thenReturn(Arrays.asList(record1, record2));
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
 
         // Act
-        int size = immutableTemporalCollection.size();
+        Collection<TemporalRecord<String>> result = immutableTemporalCollection.getInRange(FOREVER);
 
         // Assert
-        assertEquals(0, size);
+        assertThat(result).contains(record1, record2);
     }
 
     @Test
-    void testIsEmpty_nonEmptyCollection_case() {
+    void getInRange_returnsEmptyWhenNoDelegateValues() {
         // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-        when(mutableTemporalCollectionMock.isEmpty()).thenReturn(false);
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.getInRange(any())).thenReturn(Collections.emptyList());
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
 
         // Act
-        boolean isEmpty = immutableTemporalCollection.isEmpty();
+        Collection<TemporalRecord<String>> result = immutableTemporalCollection.getInRange(FOREVER);
 
         // Assert
-        assertFalse(isEmpty);
+        assertThat(result).isEmpty();
     }
 
     @Test
-    void testIsEmpty_emptyCollection_case() {
+    void size_returnsDelegateSize() {
         // Arrange
-        MutableTemporalCollection<Integer, TemporalValue<Integer>> mutableTemporalCollectionMock = Mockito.mock(MutableTemporalCollection.class);
-        ImmutableTemporalCollection<Integer, TemporalValue<Integer>> immutableTemporalCollection = new ImmutableTemporalCollection<>(mutableTemporalCollectionMock);
-        when(mutableTemporalCollectionMock.isEmpty()).thenReturn(true);
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.size()).thenReturn(10);
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
 
         // Act
-        boolean isEmpty = immutableTemporalCollection.isEmpty();
+        int result = immutableTemporalCollection.size();
 
         // Assert
-        assertTrue(isEmpty);
+        assertThat(result).isEqualTo(10);
+    }
+
+    @Test
+    void size_returnsZeroWhenDelegateIsEmpty() {
+        // Arrange
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.size()).thenReturn(0);
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
+
+        // Act
+        int result = immutableTemporalCollection.size();
+
+        // Assert
+        assertThat(result).isEqualTo(0);
+    }
+
+    @Test
+    void isEmpty_returnFalseWhenDelegateIsNotEmpty() {
+        // Arrange
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.isEmpty()).thenReturn(false);
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
+
+        // Act
+        boolean result = immutableTemporalCollection.isEmpty();
+
+        // Assert
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void isEmpty_returnsTrueWhenDelegateIsEmpty() {
+        // Arrange
+        TemporalCollection<String> delegate = Mockito.mock(TemporalCollection.class);
+        when(delegate.isEmpty()).thenReturn(true);
+        ImmutableTemporalCollection<String> immutableTemporalCollection = new ImmutableTemporalCollection<>(delegate);
+
+        // Act
+        boolean result = immutableTemporalCollection.isEmpty();
+
+        // Assert
+        assertThat(result).isTrue();
     }
 }

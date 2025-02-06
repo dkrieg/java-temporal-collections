@@ -6,96 +6,85 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
 
+import static com.rifftech.temporal.collections.TemporalRange.nowUntilMax;
+
 /**
- * Represents a mutable collection of bitemporal values, where each value is associated with both
- * a valid time range and a transaction time range. This interface extends the functionality of
- * {@link MutableTemporalCollection} to include additional methods for managing and querying
- * bitemporal data.
+ * An interface representing a mutable bi-temporal collection that stores elements
+ * of type {@code V}, where each element is associated with both a valid time range
+ * and a transaction time range. This interface extends the functionality of
+ * {@code MutableTemporalCollection} to add support for bi-temporal data management.
+ * A bi-temporal collection allows querying and modifying elements based on two
+ * independent timelines:
+ * - Valid time: Represents when the data is considered valid or applicable.
+ * - Transaction time: Represents when the data was recorded in the system.
+ * The interface provides methods to retrieve stored elements based on specific
+ * valid and transaction times.
  *
- * @param <T> the type of value stored within the bitemporal collection
+ * @param <T> the type of the value stored within the bi-temporal elements
  */
-public interface MutableBiTemporalCollection<T> extends MutableTemporalCollection<T, BiTemporalValue<T>> {
-    /**
-     * Retrieves the BiTemporalValue associated with the specified valid time and transaction time.
-     *
-     * @param validTime       the valid time used as a reference point for the lookup.
-     *                        This indicates the effective date of the value.
-     * @param transactionTime the transaction time used as a reference point for the lookup.
-     *                        This indicates when the value was recorded or changed.
-     * @return an Optional containing the BiTemporalValue found for the given validTime and transactionTime,
-     * or an empty Optional if no such value exists.
-     */
-    Optional<BiTemporalValue<T>> getAsOf(Instant validTime, Instant transactionTime);
+public interface MutableBiTemporalCollection<T> extends BiTemporalCollection<T> {
 
     /**
-     * Retrieves the BiTemporalValue associated with the time combination
-     * that immediately precedes the specified valid time and transaction time.
+     * Associates the specified item with the current moment.
      *
-     * @param validTime       the valid time used as a reference point for the lookup.
-     *                        This indicates the effective date of the value.
-     * @param transactionTime the transaction time used as a reference point for the lookup.
-     *                        This indicates when the value was recorded or changed.
-     * @return an Optional containing the BiTemporalValue found prior to the given validTime and transactionTime,
-     * or an empty Optional if no such value exists.
+     * @param item the item for which the currently valid temporal value is retrieved.
+     *             Must not be null.
+     * @return an {@code Optional} containing the previously effective temporal value ,
+     * or an empty {@code Optional} if no such value exists.
      */
-    Optional<BiTemporalValue<T>> getPriorTo(Instant validTime, Instant transactionTime);
-
-    /**
-     * Retrieves the BiTemporalValue associated with the second most recent valid time and transaction time
-     * combination that precedes the specified valid time and transaction time.
-     *
-     * @param validTime       the valid time used as a reference point for the lookup.
-     *                        This indicates the effective date of the value.
-     * @param transactionTime the transaction time used as a reference point for the lookup.
-     *                        This indicates when the value was recorded or changed.
-     * @return an Optional containing the BiTemporalValue found for the second most recent
-     *         validTime and transactionTime combination before the specified values,
-     *         or an empty Optional if no such value exists.
-     */
-    Optional<BiTemporalValue<T>> getPriorToPriorTo(Instant validTime, Instant transactionTime);
-
-    /**
-     * @see #getPriorTo(Instant, Instant)
-     */
-    default Optional<BiTemporalValue<T>> getPriorToAsOf(Instant validTime, Instant transactionTime) {
-        return getPriorTo(validTime, transactionTime);
+    default Optional<BiTemporalRecord<T>> effectiveAsOfNow(@NonNull T item) {
+        return effectiveAsOf(Instant.now(), item);
     }
 
     /**
-     * @see #getInRange(TemporalRange)
+     * Marks the specified item as effective at the given valid time, updating the internal
+     * temporal collection state accordingly.
+     * If an item already exists the given valid time, its value is replaced and returned with no history of this
+     * modification being made. Otherwise, the item is made effective at the given valid time and the prior,
+     * now expired, version is returned.
+     *
+     * @param validTime the time at which the item should be marked as effective.
+     *                  Must not be null.
+     * @param item      the item to be marked as effective at the specified valid time.
+     *                  Must not be null.
+     * @return an {@code Optional} containing the prior temporal value that was effective
+     * at the specified valid time, or an empty {@code Optional} if no prior
+     * value was present.
      */
-    default Collection<BiTemporalValue<T>> getInRangeAsOfNow(TemporalRange validTimeRange) {
-        return getInRange(validTimeRange);
+    default Optional<BiTemporalRecord<T>> effectiveAsOf(@NonNull Instant validTime, @NonNull T item) {
+        return effectiveAsOf(validTime, Instant.now(), item);
     }
 
     /**
-     * Retrieves a collection of BiTemporalValue objects that fall within the specified valid time range
-     * and transaction time range.
+     * Retrieves an optional bi-temporal record that matches the specified valid time, transaction time, and item.
+     * If the record exists and matches the provided criteria, the method returns it; otherwise, an empty optional is returned.
      *
-     * @param validTimeRange       the TemporalRange representing the range of valid times to filter the results.
-     *                             This indicates the effective dates of the values.
-     * @param transactionTimeRange the TemporalRange representing the range of transaction times to filter the results.
-     *                             This indicates the recorded or modified dates of the values.
-     * @return a collection of BiTemporalValue objects that satisfy the given valid and transaction time range criteria.
+     * @param validTime       the {@link Instant} representing the time at which the data is considered valid. Must not be null.
+     * @param transactionTime the {@link Instant} representing the time at which the data was recorded in the system. Must not be null.
+     * @param item            the item to be matched against the bi-temporal records. Must not be null.
+     * @return an {@link Optional} containing the matching bi-temporal record, or an empty optional if no matching record is found.
      */
-    Collection<BiTemporalValue<T>> getInRange(TemporalRange validTimeRange, TemporalRange transactionTimeRange);
+    Optional<BiTemporalRecord<T>> effectiveAsOf(@NonNull Instant validTime, @NonNull Instant transactionTime, @NonNull T item);
 
     /**
-     * @see #getInRange(TemporalRange, TemporalRange)
+     * Marks the record as expired as of the current moment. This method internally utilizes the
+     * {@code expireAsOf(Instant expireAt)} method with the current timestamp.
+     *
+     * @return an {@code Optional} containing the bi-temporal record that was marked as expired,
+     *         or an empty {@code Optional} if no record was affected by the expiration.
      */
-    default Collection<BiTemporalValue<T>> getInRangeAsOf(TemporalRange validTimeRange, TemporalRange transactionTimeRange) {
-        return getInRange(validTimeRange, transactionTimeRange);
+    default Optional<BiTemporalRecord<T>> expireAsOfNow() {
+        return expireAsOf(Instant.now());
     }
 
     /**
-     * Updates or sets the given item as effective at the specified valid and transaction times.
-     * This method associates the provided item with the given temporal dimensions,
-     * ensuring it is recorded as effective from the specified valid time and at the given transaction time.
+     * Marks a bi-temporal record as expired as of the specified timestamp. This updates the
+     * bi-temporal collection state to reflect the expiration of the record at the given moment.
      *
-     * @param validTime       the valid time used as a reference point. It specifies the effective date for the item.
-     * @param transactionTime the transaction time used as a reference point. It specifies when the item was
-     *                        recorded or updated in the dataset.
-     * @param item            the item to be associated with the specified valid time and transaction time. Must not be null.
+     * @param expireAt the {@link Instant} representing the point in time as of which the record
+     *                 should be marked as expired. Must not be null.
+     * @return an {@code Optional} containing the bi-temporal record that was marked as expired,
+     *         or an empty {@code Optional} if no record was found and affected by the expiration.
      */
-    void effectiveAsOf(@NonNull Instant validTime, @NonNull Instant transactionTime, @NonNull T item);
+    Optional<BiTemporalRecord<T>> expireAsOf(@NonNull Instant expireAt);
 }
