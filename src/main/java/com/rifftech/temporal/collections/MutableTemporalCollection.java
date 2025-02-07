@@ -34,11 +34,11 @@ public interface MutableTemporalCollection<T> extends TemporalCollection<T> {
      *
      * @param validTime the time at which the item should be marked as effective.
      *                  Must not be null.
-     * @param item the item to be marked as effective at the specified valid time.
-     *             Must not be null.
+     * @param item      the item to be marked as effective at the specified valid time.
+     *                  Must not be null.
      * @return an {@code Optional} containing the prior temporal value that was effective
-     *         at the specified valid time, or an empty {@code Optional} if no prior
-     *         value was present.
+     * at the specified valid time, or an empty {@code Optional} if no prior
+     * value was present.
      */
     Optional<TemporalRecord<T>> effectiveAsOf(@NonNull Instant validTime, @NonNull T item);
 
@@ -47,8 +47,8 @@ public interface MutableTemporalCollection<T> extends TemporalCollection<T> {
      * This method is a convenience wrapper around {@code expireAsOf} with the current instant as the parameter.
      *
      * @return an {@code Optional} containing the temporal record that was previously effective
-     *         and has now been marked as expired, or an empty {@code Optional}
-     *         if no such value exists.
+     * and has now been marked as expired, or an empty {@code Optional}
+     * if no such value exists.
      */
     default Optional<TemporalRecord<T>> expireAsOfNow() {
         return expireAsOf(Instant.now());
@@ -62,7 +62,7 @@ public interface MutableTemporalCollection<T> extends TemporalCollection<T> {
      *
      * @param expireAt the timestamp at which the temporal value should be marked as expired. Must not be null.
      * @return an {@code Optional} containing the temporal record that was previously effective
-     *         and has now been marked as expired, or an empty {@code Optional} if no such value exists.
+     * and has now been marked as expired, or an empty {@code Optional} if no such value exists.
      */
     Optional<TemporalRecord<T>> expireAsOf(@NonNull Instant expireAt);
 }

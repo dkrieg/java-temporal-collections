@@ -8,11 +8,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.function.Function;
 
 import static com.rifftech.temporal.collections.TemporalRange.MAX;
 import static com.rifftech.temporal.collections.TemporalRange.fromTo;
-import static com.rifftech.temporal.collections.TemporalRange.fromToMax;
 import static lombok.AccessLevel.PRIVATE;
 
 @FieldDefaults(makeFinal = true, level = PRIVATE)
@@ -22,7 +20,7 @@ public class ConcurrentSkipListTemporalCollection<T> implements MutableTemporalC
     @Override
     public Optional<TemporalRecord<T>> effectiveAsOf(@NonNull Instant validTime, @NonNull T item) {
         Optional<TemporalRecord<T>> priorValue;
-        if(items.containsKey(validTime)) {
+        if (items.containsKey(validTime)) {
             priorValue = getAsOf(validTime);
             items.put(validTime, Optional.of(item));
         } else {
@@ -38,7 +36,7 @@ public class ConcurrentSkipListTemporalCollection<T> implements MutableTemporalC
             return Optional.empty();
         } else {
             Optional<TemporalRecord<T>> priorValue;
-            if(items.containsKey(expireAt)) {
+            if (items.containsKey(expireAt)) {
                 priorValue = getAsOf(expireAt);
                 items.put(expireAt, Optional.empty());
             } else {

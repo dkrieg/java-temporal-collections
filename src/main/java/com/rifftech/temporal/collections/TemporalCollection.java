@@ -20,7 +20,7 @@ public interface TemporalCollection<T> {
      * if such a value exists.
      *
      * @return an {@code Optional} containing the value valid at the present moment,
-     *         or an empty {@code Optional} if no such value exists.
+     * or an empty {@code Optional} if no such value exists.
      */
     default Optional<TemporalRecord<T>> getAsOfNow() {
         return getAsOf(Instant.now());
@@ -32,7 +32,7 @@ public interface TemporalCollection<T> {
      * @param validTime the point in time for which to retrieve the valid temporal value.
      *                  This parameter must not be null.
      * @return an {@code Optional} containing the value valid at the specified time,
-     *         or an empty {@code Optional} if no such value exists at that time.
+     * or an empty {@code Optional} if no such value exists at that time.
      */
     Optional<TemporalRecord<T>> getAsOf(@NonNull Instant validTime);
 
@@ -41,7 +41,7 @@ public interface TemporalCollection<T> {
      * if such a value exists.
      *
      * @return an {@code Optional} containing the most recent value that was valid prior to now,
-     *         or an empty {@code Optional} if no such value exists.
+     * or an empty {@code Optional} if no such value exists.
      */
     default Optional<TemporalRecord<T>> getPriorToNow() {
         return getPriorTo(Instant.now());
@@ -54,7 +54,7 @@ public interface TemporalCollection<T> {
      * @param validTime the point in time for which to retrieve the most recent temporal value
      *                  that was valid before it. This parameter must not be null.
      * @return an {@code Optional} containing the most recent value that was valid before
-     *         the specified time, or an empty {@code Optional} if no such value exists.
+     * the specified time, or an empty {@code Optional} if no such value exists.
      */
     Optional<TemporalRecord<T>> getPriorTo(@NonNull Instant validTime);
 
@@ -62,7 +62,7 @@ public interface TemporalCollection<T> {
      * Retrieves a collection of temporal values that are valid within the specified temporal range.
      *
      * @param validRange the range of time for which to retrieve the valid temporal values.
-     *                       This parameter must not be null.
+     *                   This parameter must not be null.
      * @return a collection of temporal values that are valid within the specified range.
      * If no such values exist, an empty collection is returned.
      */

@@ -1,6 +1,7 @@
 package com.rifftech.temporal.collections;
 
-public record BiTemporalRecord<T>(TemporalRange businessEffective, TemporalRange systemEffective, T value) implements Comparable<BiTemporalRecord<T>> {
+public record BiTemporalRecord<T>(TemporalRange businessEffective, TemporalRange systemEffective,
+                                  T value) implements Comparable<BiTemporalRecord<T>> {
 
     @Override
     public int compareTo(BiTemporalRecord<T> other) {

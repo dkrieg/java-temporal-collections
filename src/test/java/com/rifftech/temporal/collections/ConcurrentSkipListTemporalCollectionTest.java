@@ -3,7 +3,6 @@ package com.rifftech.temporal.collections;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.Optional;
 
 import static com.rifftech.temporal.collections.TemporalRange.FOREVER;
 import static com.rifftech.temporal.collections.TemporalRange.fromTo;

@@ -6,7 +6,6 @@ import lombok.experimental.FieldDefaults;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Function;
@@ -27,7 +26,9 @@ public class ConcurrentSkipListBiTemporalCollection<T> implements MutableBiTempo
             priorValue = getAsOf(validTime, transactionTime);
             items.get(validTime).put(transactionTime, Optional.of(item));
         } else {
-            put(validTime, transactionTime, Optional.of(item));
+            ConcurrentSkipListMap<Instant, Optional<T>> map = new ConcurrentSkipListMap<>();
+            map.put(transactionTime, Optional.of(item));
+            items.put(validTime, map);
             priorValue = getPriorTo(validTime, transactionTime);
         }
         return priorValue;
@@ -41,9 +42,12 @@ public class ConcurrentSkipListBiTemporalCollection<T> implements MutableBiTempo
             Optional<BiTemporalRecord<T>> priorValue;
             if (items.containsKey(expireAt)) {
                 priorValue = getAsOf(expireAt);
-                items.get(expireAt).put(Instant.now(), Optional.empty());
+                ConcurrentSkipListMap<Instant, Optional<T>> map = items.get(expireAt);
+                if (!map.isEmpty()) {
+                    map.put(Instant.now(), Optional.empty());
+                }
             } else {
-                put(expireAt, Instant.now(), Optional.empty());
+                items.put(expireAt, new ConcurrentSkipListMap<>());
                 priorValue = getPriorTo(expireAt);
             }
             return priorValue;
@@ -126,9 +130,4 @@ public class ConcurrentSkipListBiTemporalCollection<T> implements MutableBiTempo
         return items.isEmpty();
     }
 
-    private void put(Instant validTime, Instant transactionTime, Optional<T> item) {
-        ConcurrentSkipListMap<Instant, Optional<T>> map = new ConcurrentSkipListMap<>();
-        map.put(transactionTime, item);
-        items.put(validTime, map);
-    }
 }

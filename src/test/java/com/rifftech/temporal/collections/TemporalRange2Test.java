@@ -72,7 +72,7 @@ class TemporalRange2Test {
         TemporalRange range2 = new TemporalRange(start2, end2);
 
         assertFalse(range1.isFinishedBy(range2), "TemporalRange.isFinishedBy has returned true, but false was expected");
-}
+    }
 
     @Test
     void isFinishedBy_startAfterBothEndsEqual_ReturnsFalse() {

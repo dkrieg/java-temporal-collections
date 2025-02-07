@@ -6,9 +6,6 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
 
-import static com.rifftech.temporal.collections.TemporalRange.FOREVER;
-import static com.rifftech.temporal.collections.TemporalRange.nowUntilMax;
-
 /**
  * An interface representing a collection of bi-temporal values. A bi-temporal value is associated
  * with both a valid time and a transaction time. This collection provides mechanisms to query
@@ -22,7 +19,7 @@ public interface BiTemporalCollection<T> {
      * if such a value exists.
      *
      * @return an {@code Optional} containing the value valid at the present moment,
-     *         or an empty {@code Optional} if no such value exists.
+     * or an empty {@code Optional} if no such value exists.
      */
     default Optional<BiTemporalRecord<T>> getAsOfNow() {
         return getAsOf(Instant.now());
@@ -34,7 +31,7 @@ public interface BiTemporalCollection<T> {
      * @param validTime the point in time for which to retrieve the valid temporal value.
      *                  This parameter must not be null.
      * @return an {@code Optional} containing the value valid at the specified time,
-     *         or an empty {@code Optional} if no such value exists at that time.
+     * or an empty {@code Optional} if no such value exists at that time.
      */
     default Optional<BiTemporalRecord<T>> getAsOf(@NonNull Instant validTime) {
         return getAsOf(validTime, Instant.now());
@@ -44,10 +41,10 @@ public interface BiTemporalCollection<T> {
      * Retrieves the value associated with the specified combination of valid time and transaction time,
      * if such a value exists.
      *
-     * @param validTime the point in time representing the validity of the value. This parameter must not be null.
+     * @param validTime       the point in time representing the validity of the value. This parameter must not be null.
      * @param transactionTime the point in time representing the transaction time of the value. This parameter must not be null.
      * @return an {@code Optional} containing the value corresponding to the specified valid time and transaction time,
-     *         or an empty {@code Optional} if no such value exists.
+     * or an empty {@code Optional} if no such value exists.
      */
     Optional<BiTemporalRecord<T>> getAsOf(@NonNull Instant validTime, @NonNull Instant transactionTime);
 
@@ -56,7 +53,7 @@ public interface BiTemporalCollection<T> {
      * if such a value exists.
      *
      * @return an {@code Optional} containing the most recent value that was valid prior to now,
-     *         or an empty {@code Optional} if no such value exists.
+     * or an empty {@code Optional} if no such value exists.
      */
     default Optional<BiTemporalRecord<T>> getPriorToNow() {
         return getPriorTo(Instant.now());
@@ -69,7 +66,7 @@ public interface BiTemporalCollection<T> {
      * @param validTime the point in time for which to retrieve the most recent temporal value
      *                  that was valid before it. This parameter must not be null.
      * @return an {@code Optional} containing the most recent value that was valid before
-     *         the specified time, or an empty {@code Optional} if no such value exists.
+     * the specified time, or an empty {@code Optional} if no such value exists.
      */
     default Optional<BiTemporalRecord<T>> getPriorTo(@NonNull Instant validTime) {
         return getPriorTo(validTime, Instant.now());
@@ -79,10 +76,10 @@ public interface BiTemporalCollection<T> {
      * Retrieves the bi-temporal value that was valid immediately prior to the specified combination
      * of valid time and transaction time, if such a value exists.
      *
-     * @param validTime the point in time representing the validity of the value. This parameter must not be null.
+     * @param validTime       the point in time representing the validity of the value. This parameter must not be null.
      * @param transactionTime the point in time representing the transaction time of the value. This parameter must not be null.
      * @return an {@code Optional} containing the bi-temporal value that was valid prior to the specified valid
-     *         time and transaction time, or an empty {@code Optional} if no such value exists.
+     * time and transaction time, or an empty {@code Optional} if no such value exists.
      */
     Optional<BiTemporalRecord<T>> getPriorTo(@NonNull Instant validTime, @NonNull Instant transactionTime);
 
@@ -90,7 +87,7 @@ public interface BiTemporalCollection<T> {
      * Retrieves a collection of temporal values that are valid within the specified temporal range.
      *
      * @param validRange the range of time for which to retrieve the valid temporal values.
-     *                       This parameter must not be null.
+     *                   This parameter must not be null.
      * @return a collection of temporal values that are valid within the specified range.
      * If no such values exist, an empty collection is returned.
      */
@@ -100,7 +97,7 @@ public interface BiTemporalCollection<T> {
      * Retrieves a collection of bi-temporal values that intersect the specified ranges of valid time
      * and transaction time.
      *
-     * @param validRange the range of valid time to filter the bi-temporal values. This range must not be null.
+     * @param validRange       the range of valid time to filter the bi-temporal values. This range must not be null.
      * @param transactionRange the range of transaction time to filter the bi-temporal values. This range must not be null.
      * @return a collection of bi-temporal values that overlap with the specified valid and transaction time ranges.
      */

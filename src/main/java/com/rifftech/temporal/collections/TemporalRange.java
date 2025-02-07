@@ -25,6 +25,17 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
      */
     public static final TemporalRange FOREVER = new TemporalRange(MIN, MAX);
 
+    /**
+     * Constructs a TemporalRange object and validates that the start and end instants are not null
+     * and that the start is before the end.
+     *
+     * @param start the starting point in time of the range
+     * @param end   the ending point in time of the range
+     */
+    public TemporalRange {
+        validateInstants(start, end);
+    }
+
     static void validateInstants(Instant start, Instant end) {
         if (start == null || end == null || !start.isBefore(end)) {
             throw new IllegalArgumentException("Start must be before end and neither can be null.");
@@ -38,17 +49,6 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
             throw new IllegalArgumentException("%s must be formatted as 'start to end' like \"2024-10-30T13:00:00Z to 2024-10-30T14:00:00Z\"".formatted(text));
         }
         return new TemporalRange(Instant.parse(split[0]), Instant.parse(split[1]));
-    }
-
-    /**
-     * Constructs a TemporalRange object and validates that the start and end instants are not null
-     * and that the start is before the end.
-     *
-     * @param start the starting point in time of the range
-     * @param end   the ending point in time of the range
-     */
-    public TemporalRange {
-        validateInstants(start, end);
     }
 
     /**
@@ -224,6 +224,18 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
         return isContiguous;
     }
 
+    private static void validateNotNull(Object obj, String message) {
+        if (obj == null) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    private static void validateDuration(Duration duration) {
+        if (duration.isNegative()) {
+            throw new IllegalArgumentException("Duration must be positive.");
+        }
+    }
+
     /**
      * Adds the specified duration to both the start and end instants of this TemporalRange.
      *
@@ -380,7 +392,7 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
      *
      * @param other the temporal range to compare with; must not be null
      * @return true if the current range starts after the start of the provided range
-     *         and ends before the end of the provided range; false otherwise
+     * and ends before the end of the provided range; false otherwise
      */
     public boolean isDuring(TemporalRange other) {
         validateNotNull(other, "The other range cannot be null.");
@@ -393,7 +405,7 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
      *
      * @param other the temporal range to compare with, must not be null
      * @return true if the current range starts at the same time as the specified range
-     *         and ends before the specified range ends, false otherwise
+     * and ends before the specified range ends, false otherwise
      */
     public boolean starts(TemporalRange other) {
         validateNotNull(other, "The other range cannot be null.");
@@ -405,7 +417,7 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
      *
      * @param other The temporal range to compare with, must not be null.
      * @return true if this temporal range is started by the specified temporal range;
-     *         false otherwise.
+     * false otherwise.
      */
     public boolean isStartedBy(TemporalRange other) {
         validateNotNull(other, "The other range cannot be null.");
@@ -453,22 +465,10 @@ public record TemporalRange(Instant start, Instant end) implements Comparable<Te
      * @param precision the {@code ChronoUnit} to which the start and end times of the range
      *                  will be truncated; must not be null
      * @return a new {@code TemporalRange} instance with the start and end times truncated
-     *         to the specified precision
+     * to the specified precision
      */
     public TemporalRange withPrecision(ChronoUnit precision) {
         validateNotNull(precision, "The precision cannot be null.");
         return new TemporalRange(start.truncatedTo(precision), end.truncatedTo(precision));
-    }
-
-    private static void validateNotNull(Object obj, String message) {
-        if (obj == null) {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
-    private static void validateDuration(Duration duration) {
-        if (duration.isNegative()) {
-            throw new IllegalArgumentException("Duration must be positive.");
-        }
     }
 }

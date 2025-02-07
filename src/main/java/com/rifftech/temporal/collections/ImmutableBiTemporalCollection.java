@@ -12,7 +12,7 @@ import static lombok.AccessLevel.PRIVATE;
 
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = PRIVATE)
-class ImmutableBiTemporalCollection<T> {
+class ImmutableBiTemporalCollection<T> implements BiTemporalCollection<T> {
     BiTemporalCollection<T> delegate;
 
     public Optional<BiTemporalRecord<T>> getAsOfNow() {

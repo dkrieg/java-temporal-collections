@@ -6,8 +6,8 @@ package com.rifftech.temporal.collections;
  * of its value while maintaining a valid temporal range.
  *
  * @param <T> The type of the value this class holds.
- * The temporal range defines the time period during which the value is considered valid.
- * Subclasses can extend this functionality to accommodate more specific temporal behaviors.
+ *            The temporal range defines the time period during which the value is considered valid.
+ *            Subclasses can extend this functionality to accommodate more specific temporal behaviors.
  */
 public record TemporalRecord<T>(TemporalRange validRange, T value) implements Comparable<TemporalRecord<T>> {
 

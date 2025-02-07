@@ -3,10 +3,7 @@ package com.rifftech.temporal.collections;
 import lombok.NonNull;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.Optional;
-
-import static com.rifftech.temporal.collections.TemporalRange.nowUntilMax;
 
 /**
  * An interface representing a mutable bi-temporal collection that stores elements
@@ -71,7 +68,7 @@ public interface MutableBiTemporalCollection<T> extends BiTemporalCollection<T> 
      * {@code expireAsOf(Instant expireAt)} method with the current timestamp.
      *
      * @return an {@code Optional} containing the bi-temporal record that was marked as expired,
-     *         or an empty {@code Optional} if no record was affected by the expiration.
+     * or an empty {@code Optional} if no record was affected by the expiration.
      */
     default Optional<BiTemporalRecord<T>> expireAsOfNow() {
         return expireAsOf(Instant.now());
@@ -84,7 +81,7 @@ public interface MutableBiTemporalCollection<T> extends BiTemporalCollection<T> 
      * @param expireAt the {@link Instant} representing the point in time as of which the record
      *                 should be marked as expired. Must not be null.
      * @return an {@code Optional} containing the bi-temporal record that was marked as expired,
-     *         or an empty {@code Optional} if no record was found and affected by the expiration.
+     * or an empty {@code Optional} if no record was found and affected by the expiration.
      */
     Optional<BiTemporalRecord<T>> expireAsOf(@NonNull Instant expireAt);
 }
