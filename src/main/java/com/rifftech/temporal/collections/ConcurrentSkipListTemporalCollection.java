@@ -73,7 +73,7 @@ public class ConcurrentSkipListTemporalCollection<T> implements MutableTemporalC
     @Override
     public Collection<TemporalRecord<T>> getInRange(@NonNull TemporalRange validRange) {
         return Optional.of(validRange)
-                .map(v -> items.subMap(v.start(), true, v.end(), false)
+                .map(v -> items.subMap(v.start(), true, v.end(), true)
                         .keySet()
                         .stream()
                         .map(this::getAsOf)

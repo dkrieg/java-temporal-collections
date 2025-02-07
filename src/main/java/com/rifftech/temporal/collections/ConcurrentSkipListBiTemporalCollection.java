@@ -94,7 +94,7 @@ public class ConcurrentSkipListBiTemporalCollection<T> implements MutableBiTempo
     @Override
     public Collection<BiTemporalRecord<T>> getInRange(@NonNull TemporalRange validRange) {
         return Optional.of(validRange)
-                .map(v -> items.subMap(v.start(), true, v.end(), false)
+                .map(v -> items.subMap(v.start(), true, v.end(), true)
                         .entrySet()
                         .stream()
                         .map(businessTimeEntry -> getAsOf(businessTimeEntry.getKey(), businessTimeEntry.getValue().firstKey()))
@@ -107,10 +107,10 @@ public class ConcurrentSkipListBiTemporalCollection<T> implements MutableBiTempo
     @Override
     public Collection<BiTemporalRecord<T>> getInRange(@NonNull TemporalRange validRange, @NonNull TemporalRange transactionRange) {
         return Optional.of(validRange)
-                .map(v -> items.subMap(v.start(), true, v.end(), false)
+                .map(v -> items.subMap(v.start(), true, v.end(), true)
                         .entrySet()
                         .stream()
-                        .map(businessTimeEntry -> businessTimeEntry.getValue().subMap(transactionRange.start(), true, transactionRange.end(), false)
+                        .map(businessTimeEntry -> businessTimeEntry.getValue().subMap(transactionRange.start(), true, transactionRange.end(), true)
                                 .keySet()
                                 .stream()
                                 .map(systemTime -> getAsOf(businessTimeEntry.getKey(), systemTime))
