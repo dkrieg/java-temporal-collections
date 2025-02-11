@@ -19,14 +19,8 @@ public class ConcurrentSkipListTemporalCollection<T> implements MutableTemporalC
 
     @Override
     public Optional<TemporalRecord<T>> effectiveAsOf(@NonNull Instant validTime, @NonNull T item) {
-        Optional<TemporalRecord<T>> priorValue;
-        if (items.containsKey(validTime)) {
-            priorValue = getAsOf(validTime);
-            items.put(validTime, Optional.of(item));
-        } else {
-            items.put(validTime, Optional.of(item));
-            priorValue = getPriorTo(validTime);
-        }
+        final Optional<TemporalRecord<T>> priorValue = getAsOf(validTime);
+        items.put(validTime, Optional.of(item));
         return priorValue;
     }
 
@@ -35,14 +29,8 @@ public class ConcurrentSkipListTemporalCollection<T> implements MutableTemporalC
         if (isEmpty()) {
             return Optional.empty();
         } else {
-            Optional<TemporalRecord<T>> priorValue;
-            if (items.containsKey(expireAt)) {
-                priorValue = getAsOf(expireAt);
-                items.put(expireAt, Optional.empty());
-            } else {
-                items.put(expireAt, Optional.empty());
-                priorValue = getPriorTo(expireAt);
-            }
+            final Optional<TemporalRecord<T>> priorValue = getAsOf(expireAt);
+            items.put(expireAt, Optional.empty());
             return priorValue;
         }
     }

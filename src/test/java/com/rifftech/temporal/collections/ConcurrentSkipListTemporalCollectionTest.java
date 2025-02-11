@@ -44,7 +44,7 @@ public class ConcurrentSkipListTemporalCollectionTest {
         assertThat(collection.effectiveAsOf(instant, 1)).isEmpty();
         assertThat(collection.effectiveAsOf(instant.plusSeconds(5), 2))
                 .isNotEmpty()
-                .hasValueSatisfying(record -> assertThat(record.validRange()).isEqualTo(fromTo(instant, instant.plusSeconds(5))))
+                .hasValueSatisfying(record -> assertThat(record.validRange()).isEqualTo(fromToMax(instant)))
                 .hasValueSatisfying(record -> assertThat(record.value()).isEqualTo(1));
         assertThat(collection.effectiveAsOf(instant, 3))
                 .isNotEmpty()
@@ -59,7 +59,7 @@ public class ConcurrentSkipListTemporalCollectionTest {
         assertThat(collection.effectiveAsOf(instant, 1)).isEmpty();
         assertThat(collection.effectiveAsOf(instant.plusSeconds(5), 2))
                 .isNotEmpty()
-                .hasValueSatisfying(record -> assertThat(record.validRange()).isEqualTo(fromTo(instant, instant.plusSeconds(5))))
+                .hasValueSatisfying(record -> assertThat(record.validRange()).isEqualTo(fromToMax(instant)))
                 .hasValueSatisfying(record -> assertThat(record.value()).isEqualTo(1));
     }
 
@@ -79,7 +79,7 @@ public class ConcurrentSkipListTemporalCollectionTest {
         assertThat(collection.effectiveAsOf(instant.minusSeconds(5), 2)).isEmpty();
         assertThat(collection.effectiveAsOf(instant, 3))
                 .isNotEmpty()
-                .hasValueSatisfying(record -> assertThat(record.validRange()).isEqualTo(fromTo(instant.minusSeconds(5), instant)))
+                .hasValueSatisfying(record -> assertThat(record.validRange()).isEqualTo(fromTo(instant.minusSeconds(5), instant.plusSeconds(5))))
                 .hasValueSatisfying(record -> assertThat(record.value()).isEqualTo(2));
     }
 
@@ -130,7 +130,7 @@ public class ConcurrentSkipListTemporalCollectionTest {
         assertThat(collection.effectiveAsOf(instant, 1)).isEmpty();
         assertThat(collection.expireAsOf(instant.plusSeconds(5)))
                 .isNotEmpty()
-                .hasValueSatisfying(record -> assertThat(record.validRange()).isEqualTo(fromTo(instant, instant.plusSeconds(5))))
+                .hasValueSatisfying(record -> assertThat(record.validRange()).isEqualTo(fromToMax(instant)))
                 .hasValueSatisfying(record -> assertThat(record.value()).isEqualTo(1));
     }
 
@@ -150,7 +150,7 @@ public class ConcurrentSkipListTemporalCollectionTest {
         assertThat(collection.effectiveAsOf(instant.minusSeconds(5), 2)).isEmpty();
         assertThat(collection.expireAsOf(instant))
                 .isNotEmpty()
-                .hasValueSatisfying(record -> assertThat(record.validRange()).isEqualTo(fromTo(instant.minusSeconds(5), instant)))
+                .hasValueSatisfying(record -> assertThat(record.validRange()).isEqualTo(fromTo(instant.minusSeconds(5), instant.plusSeconds(5))))
                 .hasValueSatisfying(record -> assertThat(record.value()).isEqualTo(2));
     }
 

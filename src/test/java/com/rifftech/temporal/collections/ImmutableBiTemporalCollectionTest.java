@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.rifftech.temporal.collections.TemporalRange.FOREVER;
+import static com.rifftech.temporal.collections.TemporalRange.nowUntilMax;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -18,7 +19,8 @@ public class ImmutableBiTemporalCollectionTest {
 
     @Test
     public void testGetAsOfNow() {
-        BiTemporalRecord<String> record = new BiTemporalRecord<>(null, null, "test");
+        TemporalRange range = nowUntilMax();
+        BiTemporalRecord<String> record = new BiTemporalRecord<>(range, range, "test");
         BiTemporalCollection<String> delegate = Mockito.mock(BiTemporalCollection.class);
         when(delegate.getAsOfNow()).thenReturn(Optional.of(record));
 
@@ -39,13 +41,13 @@ public class ImmutableBiTemporalCollectionTest {
 
     @Test
     public void testGetAsOf() {
-        Instant validTime = Instant.now();
-        BiTemporalRecord<String> record = new BiTemporalRecord<>(null, null, "test");
+        TemporalRange range = nowUntilMax();
+        BiTemporalRecord<String> record = new BiTemporalRecord<>(range, range, "test");
         BiTemporalCollection<String> delegate = Mockito.mock(BiTemporalCollection.class);
-        when(delegate.getAsOf(validTime)).thenReturn(Optional.of(record));
+        when(delegate.getAsOf(range.start())).thenReturn(Optional.of(record));
 
         ImmutableBiTemporalCollection<String> collection = new ImmutableBiTemporalCollection<>(delegate);
-        Optional<BiTemporalRecord<String>> result = collection.getAsOf(validTime);
+        Optional<BiTemporalRecord<String>> result = collection.getAsOf(record.businessEffective().start());
         assertEquals(Optional.of(record), result);
     }
 
@@ -62,14 +64,13 @@ public class ImmutableBiTemporalCollectionTest {
 
     @Test
     public void testGetAsOfValidAndTransactionTime() {
-        Instant validTime = Instant.now();
-        Instant transactionTime = Instant.now();
-        BiTemporalRecord<String> record = new BiTemporalRecord<>(null, null, "test");
+        TemporalRange range = nowUntilMax();
+        BiTemporalRecord<String> record = new BiTemporalRecord<>(range, range, "test");
         BiTemporalCollection<String> delegate = Mockito.mock(BiTemporalCollection.class);
-        when(delegate.getAsOf(validTime, transactionTime)).thenReturn(Optional.of(record));
+        when(delegate.getAsOf(record.businessEffective().start(), record.systemEffective().start())).thenReturn(Optional.of(record));
 
         ImmutableBiTemporalCollection<String> collection = new ImmutableBiTemporalCollection<>(delegate);
-        Optional<BiTemporalRecord<String>> result = collection.getAsOf(validTime, transactionTime);
+        Optional<BiTemporalRecord<String>> result = collection.getAsOf(record.businessEffective().start(), record.systemEffective().start());
         assertEquals(Optional.of(record), result);
     }
 
@@ -97,7 +98,8 @@ public class ImmutableBiTemporalCollectionTest {
 
     @Test
     public void testGetPriorToNow() {
-        BiTemporalRecord<String> record = new BiTemporalRecord<>(null, null, "test");
+        TemporalRange range = nowUntilMax();
+        BiTemporalRecord<String> record = new BiTemporalRecord<>(range, range, "test");
         BiTemporalCollection<String> delegate = Mockito.mock(BiTemporalCollection.class);
         when(delegate.getPriorToNow()).thenReturn(Optional.of(record));
 
@@ -120,40 +122,38 @@ public class ImmutableBiTemporalCollectionTest {
 
     @Test
     public void testGetPriorToSpecificInstant() {
-        Instant validTime = Instant.now();
-        BiTemporalRecord<String> record = new BiTemporalRecord<>(null, null, "test");
+        TemporalRange range = nowUntilMax();
+        BiTemporalRecord<String> record = new BiTemporalRecord<>(range, range, "test");
         BiTemporalCollection<String> delegate = Mockito.mock(BiTemporalCollection.class);
-        when(delegate.getPriorTo(validTime)).thenReturn(Optional.of(record));
+        when(delegate.getPriorTo(record.businessEffective().start())).thenReturn(Optional.of(record));
 
         ImmutableBiTemporalCollection<String> collection = new ImmutableBiTemporalCollection<>(delegate);
-        Optional<BiTemporalRecord<String>> result = collection.getPriorTo(validTime);
+        Optional<BiTemporalRecord<String>> result = collection.getPriorTo(record.businessEffective().start());
         assertEquals(Optional.of(record), result);
     }
 
 
     @Test
     public void testGetPriorToValidAndTransactionTimeEmpty() {
-        Instant validTime = Instant.now();
-        Instant transactionTime = Instant.now();
-        BiTemporalRecord<String> record = new BiTemporalRecord<>(null, null, "test");
+        TemporalRange range = nowUntilMax();
+        BiTemporalRecord<String> record = new BiTemporalRecord<>(range, range, "test");
         BiTemporalCollection<String> delegate = Mockito.mock(BiTemporalCollection.class);
-        when(delegate.getPriorTo(validTime, transactionTime)).thenReturn(Optional.empty());
+        when(delegate.getPriorTo(record.businessEffective().start(), record.systemEffective().start())).thenReturn(Optional.empty());
 
         ImmutableBiTemporalCollection<String> collection = new ImmutableBiTemporalCollection<>(delegate);
-        Optional<BiTemporalRecord<String>> result = collection.getPriorTo(validTime, transactionTime);
+        Optional<BiTemporalRecord<String>> result = collection.getPriorTo(record.businessEffective().start(), record.systemEffective().start());
         assertEquals(Optional.empty(), result);
     }
 
     @Test
     public void testGetPriorToValidAndTransactionTime() {
-        Instant validTime = Instant.now();
-        Instant transactionTime = Instant.now();
-        BiTemporalRecord<String> record = new BiTemporalRecord<>(null, null, "test");
+        TemporalRange range = nowUntilMax();
+        BiTemporalRecord<String> record = new BiTemporalRecord<>(range, range, "test");
         BiTemporalCollection<String> delegate = Mockito.mock(BiTemporalCollection.class);
-        when(delegate.getPriorTo(validTime, transactionTime)).thenReturn(Optional.of(record));
+        when(delegate.getPriorTo(record.businessEffective().start(), record.systemEffective().start())).thenReturn(Optional.of(record));
 
         ImmutableBiTemporalCollection<String> collection = new ImmutableBiTemporalCollection<>(delegate);
-        Optional<BiTemporalRecord<String>> result = collection.getPriorTo(validTime, transactionTime);
+        Optional<BiTemporalRecord<String>> result = collection.getPriorTo(record.businessEffective().start(), record.systemEffective().start());
         assertEquals(Optional.of(record), result);
     }
 

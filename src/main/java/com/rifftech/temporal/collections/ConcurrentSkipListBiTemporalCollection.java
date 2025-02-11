@@ -21,34 +21,30 @@ public class ConcurrentSkipListBiTemporalCollection<T> implements MutableBiTempo
 
     @Override
     public Optional<BiTemporalRecord<T>> effectiveAsOf(@NonNull Instant validTime, @NonNull Instant transactionTime, @NonNull T item) {
-        Optional<BiTemporalRecord<T>> priorValue;
+        final Optional<BiTemporalRecord<T>> priorValue = getAsOf(validTime, transactionTime);
         if (items.containsKey(validTime)) {
-            priorValue = getAsOf(validTime, transactionTime);
             items.get(validTime).put(transactionTime, Optional.of(item));
         } else {
             ConcurrentSkipListMap<Instant, Optional<T>> map = new ConcurrentSkipListMap<>();
             map.put(transactionTime, Optional.of(item));
             items.put(validTime, map);
-            priorValue = getPriorTo(validTime, transactionTime);
         }
         return priorValue;
     }
 
     @Override
-    public Optional<BiTemporalRecord<T>> expireAsOf(@NonNull Instant expireAt) {
+    public Optional<BiTemporalRecord<T>> expireAsOf(@NonNull Instant businessTime, @NonNull Instant systemTime) {
         if (isEmpty()) {
             return Optional.empty();
         } else {
-            Optional<BiTemporalRecord<T>> priorValue;
-            if (items.containsKey(expireAt)) {
-                priorValue = getAsOf(expireAt);
-                ConcurrentSkipListMap<Instant, Optional<T>> map = items.get(expireAt);
+            final Optional<BiTemporalRecord<T>> priorValue = getAsOf(businessTime, systemTime);
+            if (items.containsKey(businessTime)) {
+                ConcurrentSkipListMap<Instant, Optional<T>> map = items.get(businessTime);
                 if (!map.isEmpty()) {
-                    map.put(Instant.now(), Optional.empty());
+                    map.put(systemTime, Optional.empty());
                 }
             } else {
-                items.put(expireAt, new ConcurrentSkipListMap<>());
-                priorValue = getPriorTo(expireAt);
+                items.put(businessTime, new ConcurrentSkipListMap<>());
             }
             return priorValue;
         }

@@ -40,7 +40,7 @@ public interface MutableBiTemporalCollection<T> extends BiTemporalCollection<T> 
      * modification being made. Otherwise, the item is made effective at the given valid time and the prior,
      * now expired, version is returned.
      *
-     * @param validTime the time at which the item should be marked as effective.
+     * @param businessTime the time at which the item should be marked as effective.
      *                  Must not be null.
      * @param item      the item to be marked as effective at the specified valid time.
      *                  Must not be null.
@@ -48,20 +48,20 @@ public interface MutableBiTemporalCollection<T> extends BiTemporalCollection<T> 
      * at the specified valid time, or an empty {@code Optional} if no prior
      * value was present.
      */
-    default Optional<BiTemporalRecord<T>> effectiveAsOf(@NonNull Instant validTime, @NonNull T item) {
-        return effectiveAsOf(validTime, Instant.now(), item);
+    default Optional<BiTemporalRecord<T>> effectiveAsOf(@NonNull Instant businessTime, @NonNull T item) {
+        return effectiveAsOf(businessTime, Instant.now(), item);
     }
 
     /**
      * Retrieves an optional bi-temporal record that matches the specified valid time, transaction time, and item.
      * If the record exists and matches the provided criteria, the method returns it; otherwise, an empty optional is returned.
      *
-     * @param validTime       the {@link Instant} representing the time at which the data is considered valid. Must not be null.
-     * @param transactionTime the {@link Instant} representing the time at which the data was recorded in the system. Must not be null.
+     * @param businessTime       the {@link Instant} representing the time at which the data is considered valid. Must not be null.
+     * @param systemTime the {@link Instant} representing the time at which the data was recorded in the system. Must not be null.
      * @param item            the item to be matched against the bi-temporal records. Must not be null.
      * @return an {@link Optional} containing the matching bi-temporal record, or an empty optional if no matching record is found.
      */
-    Optional<BiTemporalRecord<T>> effectiveAsOf(@NonNull Instant validTime, @NonNull Instant transactionTime, @NonNull T item);
+    Optional<BiTemporalRecord<T>> effectiveAsOf(@NonNull Instant businessTime, @NonNull Instant systemTime, @NonNull T item);
 
     /**
      * Marks the record as expired as of the current moment. This method internally utilizes the
@@ -83,5 +83,21 @@ public interface MutableBiTemporalCollection<T> extends BiTemporalCollection<T> 
      * @return an {@code Optional} containing the bi-temporal record that was marked as expired,
      * or an empty {@code Optional} if no record was found and affected by the expiration.
      */
-    Optional<BiTemporalRecord<T>> expireAsOf(@NonNull Instant expireAt);
+    default Optional<BiTemporalRecord<T>> expireAsOf(@NonNull Instant expireAt) {
+        return expireAsOf(expireAt, Instant.now());
+    }
+
+    /**
+     * Marks a bi-temporal record as expired as of the specified business and system timestamps.
+     * This updates the bi-temporal collection state to reflect the expiration of the record
+     * at the given business and system times.
+     *
+     * @param businessTime the {@link Instant} representing the point in time for the business-valid period
+     *                     as of which the record should be marked as expired. Must not be null.
+     * @param systemTime   the {@link Instant} representing the point in time for the system-valid period
+     *                     as of which the record should be marked as expired. Must not be null.
+     * @return an {@code Optional} containing the bi-temporal record that was marked as expired,
+     * or an empty {@code Optional} if no record was found and affected by the expiration.
+     */
+    Optional<BiTemporalRecord<T>> expireAsOf(@NonNull Instant businessTime, @NonNull Instant systemTime);
 }

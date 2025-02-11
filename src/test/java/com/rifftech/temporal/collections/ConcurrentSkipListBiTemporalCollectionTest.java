@@ -89,7 +89,7 @@ public class ConcurrentSkipListBiTemporalCollectionTest {
         assertThat(collection.effectiveAsOf(now, now, 1)).isEmpty();
         assertThat(collection.effectiveAsOf(now.plusSeconds(5), now.plusSeconds(5), 2))
                 .isNotEmpty()
-                .hasValueSatisfying(record -> assertThat(record.businessEffective()).isEqualTo(fromTo(now, now.plusSeconds(5))))
+                .hasValueSatisfying(record -> assertThat(record.businessEffective()).isEqualTo(fromToMax(now)))
                 .hasValueSatisfying(record -> assertThat(record.systemEffective()).isEqualTo(fromToMax(now)))
                 .hasValueSatisfying(record -> assertThat(record.value()).isEqualTo(1));
         assertThat(collection.effectiveAsOf(now, now, 3))
@@ -145,7 +145,7 @@ public class ConcurrentSkipListBiTemporalCollectionTest {
         assertThat(collection.effectiveAsOf(instant, 1)).isEmpty();
         assertThat(collection.expireAsOf(instant.plusSeconds(5)))
                 .isNotEmpty()
-                .hasValueSatisfying(record -> assertThat(record.businessEffective()).isEqualTo(fromTo(instant, instant.plusSeconds(5))))
+                .hasValueSatisfying(record -> assertThat(record.businessEffective()).isEqualTo(fromToMax(instant)))
                 .hasValueSatisfying(record -> assertThat(record.value()).isEqualTo(1));
     }
 
@@ -165,7 +165,7 @@ public class ConcurrentSkipListBiTemporalCollectionTest {
         assertThat(collection.effectiveAsOf(instant.minusSeconds(5), 2)).isEmpty();
         assertThat(collection.expireAsOf(instant))
                 .isNotEmpty()
-                .hasValueSatisfying(record -> assertThat(record.businessEffective()).isEqualTo(fromTo(instant.minusSeconds(5), instant)))
+                .hasValueSatisfying(record -> assertThat(record.businessEffective()).isEqualTo(fromTo(instant.minusSeconds(5), instant.plusSeconds(5))))
                 .hasValueSatisfying(record -> assertThat(record.value()).isEqualTo(2));
     }
 
