@@ -19,6 +19,10 @@ public class BiTemporalCollections {
         return collection;
     }
 
+    public static <T> BiTemporalCollection<T> immutableBiTemporalCollection(MutableBiTemporalCollection<T> collection) {
+        return new ImmutableBiTemporalCollection<>(collection);
+    }
+
     public static <T> BiTemporalCollection<T> immutableBiTemporalCollection(Collection<BiTemporalRecord<T>> temporalRecords) {
         return new ImmutableBiTemporalCollection<>(createBiTemporalCollection(temporalRecords));
     }

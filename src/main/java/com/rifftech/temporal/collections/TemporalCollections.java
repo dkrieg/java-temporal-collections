@@ -17,6 +17,10 @@ public class TemporalCollections {
         return collection;
     }
 
+    public static <T> TemporalCollection<T> immutableTemporalCollection(MutableTemporalCollection<T> collection) {
+        return new ImmutableTemporalCollection<>(collection);
+    }
+
     public static <T> TemporalCollection<T> immutableTemporalCollection(Collection<TemporalRecord<T>> temporalRecords) {
         return new ImmutableTemporalCollection<T>(createTemporalCollection(temporalRecords));
     }
