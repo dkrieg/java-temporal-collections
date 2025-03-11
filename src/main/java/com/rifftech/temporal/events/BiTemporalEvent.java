@@ -19,4 +19,5 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 public sealed class BiTemporalEvent<T> permits BiTemporalRecordInserted, BiTemporalRecordUpdated, BiTemporalRecordDeleted {
     BiTemporalRecord<T> record;
+    BiTemporalEventType eventType;
 }

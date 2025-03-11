@@ -18,4 +18,5 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(makeFinal = true, level = PRIVATE)
 public sealed class TemporalEvent<T> permits TemporalRecordInserted, TemporalRecordUpdated, TemporalRecordDeleted {
     TemporalRecord<T> record;
+    TemporalEventType eventType;
 }
