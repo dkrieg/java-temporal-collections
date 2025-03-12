@@ -1,6 +1,7 @@
 package com.rifftech.temporal.collections;
 
 import com.rifftech.temporal.events.TemporalEventProducer;
+import lombok.NonNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -36,31 +37,12 @@ public class EventPublishingTemporalCollectionTest {
     }
 
     @Test
-    public void effectiveAsOfSkipEvent_WithNull() {
-        ConcurrentSkipListTemporalCollection<Integer> mockCollection = Mockito.mock(ConcurrentSkipListTemporalCollection.class);
-        TemporalEventProducer<Integer> mockEventProducer = Mockito.mock(TemporalEventProducer.class);
-        EventPublishingTemporalCollection<Integer> collection = new EventPublishingTemporalCollection<>(mockCollection, mockEventProducer);
-
-        assertThatNullPointerException().isThrownBy(() -> collection.effectiveAsOfSkipEvent(null, 5));
-        assertThatNullPointerException().isThrownBy(() -> collection.effectiveAsOfSkipEvent(Instant.now(), null));
-    }
-
-    @Test
     public void expireAsOf_WithNull() {
         ConcurrentSkipListTemporalCollection<Integer> mockCollection = Mockito.mock(ConcurrentSkipListTemporalCollection.class);
         TemporalEventProducer<Integer> mockEventProducer = Mockito.mock(TemporalEventProducer.class);
         EventPublishingTemporalCollection<Integer> collection = new EventPublishingTemporalCollection<>(mockCollection, mockEventProducer);
 
         assertThatNullPointerException().isThrownBy(() -> collection.expireAsOf(null));
-    }
-
-    @Test
-    public void expireAsOfSkipEvent_WithNull() {
-        ConcurrentSkipListTemporalCollection<Integer> mockCollection = Mockito.mock(ConcurrentSkipListTemporalCollection.class);
-        TemporalEventProducer<Integer> mockEventProducer = Mockito.mock(TemporalEventProducer.class);
-        EventPublishingTemporalCollection<Integer> collection = new EventPublishingTemporalCollection<>(mockCollection, mockEventProducer);
-
-        assertThatNullPointerException().isThrownBy(() -> collection.expireAsOfSkipEvent(null));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.rifftech.temporal.collections;
 
 import com.rifftech.temporal.events.BiTemporalEventProducer;
+import lombok.NonNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -34,33 +35,12 @@ public class EventPublishingBiTemporalCollectionTest {
     }
 
     @Test
-    public void effectiveAsOfSkipEvent_WithNull() {
-        ConcurrentSkipListBiTemporalCollection<Integer> mockCollection = Mockito.mock(ConcurrentSkipListBiTemporalCollection.class);
-        BiTemporalEventProducer<Integer> mockEventProducer = Mockito.mock(BiTemporalEventProducer.class);
-        EventPublishingBiTemporalCollection<Integer> collection = new EventPublishingBiTemporalCollection<>(mockCollection, mockEventProducer);
-
-        assertThatNullPointerException().isThrownBy(() -> collection.effectiveAsOfSkipEvent(Instant.now(), null, 5));
-        assertThatNullPointerException().isThrownBy(() -> collection.effectiveAsOfSkipEvent(null, Instant.now(), 5));
-        assertThatNullPointerException().isThrownBy(() -> collection.effectiveAsOfSkipEvent(Instant.now(), Instant.now(), null));
-    }
-
-    @Test
     public void expireAsOf_WithNull() {
         ConcurrentSkipListBiTemporalCollection<Integer> mockCollection = Mockito.mock(ConcurrentSkipListBiTemporalCollection.class);
         BiTemporalEventProducer<Integer> mockEventProducer = Mockito.mock(BiTemporalEventProducer.class);
         EventPublishingBiTemporalCollection<Integer> collection = new EventPublishingBiTemporalCollection<>(mockCollection, mockEventProducer);
 
         assertThatNullPointerException().isThrownBy(() -> collection.expireAsOf(null));
-    }
-
-    @Test
-    public void expireAsOfSkipEvent_WithNull() {
-        ConcurrentSkipListBiTemporalCollection<Integer> mockCollection = Mockito.mock(ConcurrentSkipListBiTemporalCollection.class);
-        BiTemporalEventProducer<Integer> mockEventProducer = Mockito.mock(BiTemporalEventProducer.class);
-        EventPublishingBiTemporalCollection<Integer> collection = new EventPublishingBiTemporalCollection<>(mockCollection, mockEventProducer);
-
-        assertThatNullPointerException().isThrownBy(() -> collection.expireAsOfSkipEvent(Instant.now(),null));
-        assertThatNullPointerException().isThrownBy(() -> collection.expireAsOfSkipEvent(null, Instant.now()));
     }
 
     @Test

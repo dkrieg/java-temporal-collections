@@ -28,7 +28,7 @@ public class EventPublishingTemporalCollection<T> implements MutableTemporalColl
 
     @Override
     public Optional<TemporalRecord<T>> effectiveAsOf(@NonNull Instant validTime, @NonNull T item) {
-        Optional<TemporalRecord<T>> priorValue = effectiveAsOfSkipEvent(validTime, item);
+        Optional<TemporalRecord<T>> priorValue = collection.effectiveAsOf(validTime, item);
         priorValue.flatMap(r -> getAsOf(r.validRange().start()))
                 .map(TemporalRecordUpdated::new)
                 .ifPresent(eventProducer::publish);
@@ -37,10 +37,6 @@ public class EventPublishingTemporalCollection<T> implements MutableTemporalColl
                 .map(TemporalRecordInserted::new)
                 .ifPresent(eventProducer::publish);
         return priorValue;
-    }
-
-    public Optional<TemporalRecord<T>> effectiveAsOfSkipEvent(@NonNull Instant validTime, @NonNull T item) {
-        return collection.effectiveAsOf(validTime, item);
     }
 
     @Override

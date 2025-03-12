@@ -28,7 +28,7 @@ public class EventPublishingBiTemporalCollection<T> implements MutableBiTemporal
 
     @Override
     public Optional<BiTemporalRecord<T>> effectiveAsOf(@NonNull Instant validTime, @NonNull Instant transactionTime, @NonNull T item) {
-        Optional<BiTemporalRecord<T>> priorValue = effectiveAsOfSkipEvent(validTime, transactionTime, item);
+        Optional<BiTemporalRecord<T>> priorValue = collection.effectiveAsOf(validTime, transactionTime, item);
         priorValue.flatMap(r -> getAsOf(r.businessEffective().start(), r.systemEffective().start()))
                 .map(BiTemporalRecordUpdated::new)
                 .ifPresent(eventProducer::publish);
@@ -37,10 +37,6 @@ public class EventPublishingBiTemporalCollection<T> implements MutableBiTemporal
                 .map(BiTemporalRecordInserted::new)
                 .ifPresent(eventProducer::publish);
         return priorValue;
-    }
-
-    public Optional<BiTemporalRecord<T>> effectiveAsOfSkipEvent(@NonNull Instant validTime, @NonNull Instant transactionTime, @NonNull T item) {
-        return collection.effectiveAsOf(validTime, transactionTime, item);
     }
 
     @Override
