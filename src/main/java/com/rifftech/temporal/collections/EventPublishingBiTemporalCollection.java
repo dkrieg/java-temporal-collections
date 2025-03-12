@@ -42,7 +42,7 @@ public class EventPublishingBiTemporalCollection<T> implements MutableBiTemporal
     @Override
     public Optional<BiTemporalRecord<T>> expireAsOf(@NonNull Instant businessTime, @NonNull Instant systemTime) {
         Optional<BiTemporalRecord<T>> asOf = getAsOf(businessTime, systemTime);
-        Optional<BiTemporalRecord<T>> priorValue = expireAsOfSkipEvent(businessTime, systemTime);
+        Optional<BiTemporalRecord<T>> priorValue = collection.expireAsOf(businessTime, systemTime);
         priorValue.ifPresent(record -> {
             Boolean isDelete = asOf.map(r -> businessTime.equals(r.businessEffective().start()) && systemTime.equals(r.systemEffective().start())).orElse(false);
             if (isDelete) {
@@ -52,10 +52,6 @@ public class EventPublishingBiTemporalCollection<T> implements MutableBiTemporal
             }
         });
         return priorValue;
-    }
-
-    public Optional<BiTemporalRecord<T>> expireAsOfSkipEvent(@NonNull Instant businessTime, @NonNull Instant systemTime) {
-        return collection.expireAsOf(businessTime, systemTime);
     }
 
     @Override

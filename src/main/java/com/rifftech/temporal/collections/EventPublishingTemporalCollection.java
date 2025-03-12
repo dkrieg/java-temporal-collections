@@ -42,7 +42,7 @@ public class EventPublishingTemporalCollection<T> implements MutableTemporalColl
     @Override
     public Optional<TemporalRecord<T>> expireAsOf(@NonNull Instant expireAt) {
         Optional<TemporalRecord<T>> asOf = getAsOf(expireAt);
-        Optional<TemporalRecord<T>> priorValue = expireAsOfSkipEvent(expireAt);
+        Optional<TemporalRecord<T>> priorValue = collection.expireAsOf(expireAt);
         priorValue.ifPresent(record -> {
             Boolean isDeleted = asOf.map(r -> expireAt.equals(r.validRange().start())).orElse(false);
             if (isDeleted) {
@@ -52,10 +52,6 @@ public class EventPublishingTemporalCollection<T> implements MutableTemporalColl
             }
         });
         return priorValue;
-    }
-
-    public Optional<TemporalRecord<T>> expireAsOfSkipEvent(@NonNull Instant expireAt) {
-        return collection.expireAsOf(expireAt);
     }
 
     @Override
