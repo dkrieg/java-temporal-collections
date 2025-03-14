@@ -3,10 +3,6 @@ package com.rifftech.temporal.collections;
 import com.rifftech.temporal.events.BiTemporalEventProducer;
 import com.rifftech.temporal.events.BiTemporalRecordInserted;
 import com.rifftech.temporal.events.BiTemporalRecordUpdated;
-import com.rifftech.temporal.events.TemporalEventProducer;
-import com.rifftech.temporal.events.TemporalRecordDeleted;
-import com.rifftech.temporal.events.TemporalRecordInserted;
-import com.rifftech.temporal.events.TemporalRecordUpdated;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -21,7 +17,6 @@ import static com.rifftech.temporal.collections.TemporalRange.FOREVER;
 import static com.rifftech.temporal.collections.TemporalRange.fromTo;
 import static com.rifftech.temporal.collections.TemporalRange.fromToMax;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 

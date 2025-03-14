@@ -1,7 +1,6 @@
 package com.rifftech.temporal.collections;
 
 import com.rifftech.temporal.events.BiTemporalEventProducer;
-import lombok.NonNull;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

@@ -1,7 +1,6 @@
 package com.rifftech.temporal.collections;
 
 import com.rifftech.temporal.events.BiTemporalEventProducer;
-import com.rifftech.temporal.events.TemporalEventProducer;
 
 import java.util.Collection;
 import java.util.SortedSet;

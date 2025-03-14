@@ -3,6 +3,8 @@ package com.rifftech.temporal.collections;
 import lombok.NonNull;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Optional;
 
 /**
@@ -30,7 +32,11 @@ public interface MutableBiTemporalCollection<T> extends BiTemporalCollection<T> 
      * or an empty {@code Optional} if no such value exists.
      */
     default Optional<BiTemporalRecord<T>> effectiveAsOfNow(@NonNull T item) {
-        return effectiveAsOf(Instant.now(), item);
+        return effectiveAsOfNow(item, ChronoUnit.NANOS);
+    }
+
+    default Optional<BiTemporalRecord<T>> effectiveAsOfNow(@NonNull T item, @NonNull TemporalUnit precision) {
+        return effectiveAsOf(Instant.now(), item, precision);
     }
 
     /**
@@ -41,27 +47,35 @@ public interface MutableBiTemporalCollection<T> extends BiTemporalCollection<T> 
      * now expired, version is returned.
      *
      * @param businessTime the time at which the item should be marked as effective.
-     *                  Must not be null.
-     * @param item      the item to be marked as effective at the specified valid time.
-     *                  Must not be null.
+     *                     Must not be null.
+     * @param item         the item to be marked as effective at the specified valid time.
+     *                     Must not be null.
      * @return an {@code Optional} containing the prior temporal value that was effective
      * at the specified valid time, or an empty {@code Optional} if no prior
      * value was present.
      */
     default Optional<BiTemporalRecord<T>> effectiveAsOf(@NonNull Instant businessTime, @NonNull T item) {
-        return effectiveAsOf(businessTime, Instant.now(), item);
+        return effectiveAsOf(businessTime, item, ChronoUnit.NANOS);
+    }
+
+    default Optional<BiTemporalRecord<T>> effectiveAsOf(@NonNull Instant businessTime, @NonNull T item, @NonNull TemporalUnit precision) {
+        return effectiveAsOf(businessTime, Instant.now(), item, precision);
     }
 
     /**
      * Retrieves an optional bi-temporal record that matches the specified valid time, transaction time, and item.
      * If the record exists and matches the provided criteria, the method returns it; otherwise, an empty optional is returned.
      *
-     * @param businessTime       the {@link Instant} representing the time at which the data is considered valid. Must not be null.
-     * @param systemTime the {@link Instant} representing the time at which the data was recorded in the system. Must not be null.
-     * @param item            the item to be matched against the bi-temporal records. Must not be null.
+     * @param businessTime the {@link Instant} representing the time at which the data is considered valid. Must not be null.
+     * @param systemTime   the {@link Instant} representing the time at which the data was recorded in the system. Must not be null.
+     * @param item         the item to be matched against the bi-temporal records. Must not be null.
      * @return an {@link Optional} containing the matching bi-temporal record, or an empty optional if no matching record is found.
      */
     Optional<BiTemporalRecord<T>> effectiveAsOf(@NonNull Instant businessTime, @NonNull Instant systemTime, @NonNull T item);
+
+    default Optional<BiTemporalRecord<T>> effectiveAsOf(@NonNull Instant businessTime, @NonNull Instant systemTime, @NonNull T item, @NonNull TemporalUnit precision) {
+        return effectiveAsOf(businessTime.truncatedTo(precision), systemTime.truncatedTo(precision), item);
+    }
 
     /**
      * Marks the record as expired as of the current moment. This method internally utilizes the
@@ -71,7 +85,11 @@ public interface MutableBiTemporalCollection<T> extends BiTemporalCollection<T> 
      * or an empty {@code Optional} if no record was affected by the expiration.
      */
     default Optional<BiTemporalRecord<T>> expireAsOfNow() {
-        return expireAsOf(Instant.now());
+        return expireAsOfNow(ChronoUnit.NANOS);
+    }
+
+    default Optional<BiTemporalRecord<T>> expireAsOfNow(@NonNull TemporalUnit precision) {
+        return expireAsOf(Instant.now().truncatedTo(precision));
     }
 
     /**
@@ -84,7 +102,11 @@ public interface MutableBiTemporalCollection<T> extends BiTemporalCollection<T> 
      * or an empty {@code Optional} if no record was found and affected by the expiration.
      */
     default Optional<BiTemporalRecord<T>> expireAsOf(@NonNull Instant expireAt) {
-        return expireAsOf(expireAt, Instant.now());
+        return expireAsOf(expireAt, ChronoUnit.NANOS);
+    }
+
+    default Optional<BiTemporalRecord<T>> expireAsOf(@NonNull Instant expireAt, @NonNull TemporalUnit precision) {
+        return expireAsOf(expireAt, Instant.now(), precision);
     }
 
     /**
@@ -100,4 +122,8 @@ public interface MutableBiTemporalCollection<T> extends BiTemporalCollection<T> 
      * or an empty {@code Optional} if no record was found and affected by the expiration.
      */
     Optional<BiTemporalRecord<T>> expireAsOf(@NonNull Instant businessTime, @NonNull Instant systemTime);
+
+    default Optional<BiTemporalRecord<T>> expireAsOf(@NonNull Instant businessTime, @NonNull Instant systemTime, @NonNull TemporalUnit precision) {
+        return expireAsOf(businessTime.truncatedTo(precision), systemTime.truncatedTo(precision));
+    }
 }
