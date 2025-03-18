@@ -3,6 +3,7 @@ package com.rifftech.temporal.collections;
 import com.rifftech.temporal.events.TemporalEventProducer;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -15,6 +16,10 @@ public class TemporalCollections {
             collection.expireAsOf(r.validRange().end());
         });
         return collection;
+    }
+
+    public static <T> TemporalCollection<T> emptyTemporalCollection() {
+        return createTemporalCollection(Collections.emptyList());
     }
 
     public static <T> TemporalCollection<T> immutableTemporalCollection(MutableTemporalCollection<T> collection) {

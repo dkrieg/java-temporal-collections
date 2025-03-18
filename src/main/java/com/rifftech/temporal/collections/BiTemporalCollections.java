@@ -3,10 +3,12 @@ package com.rifftech.temporal.collections;
 import com.rifftech.temporal.events.BiTemporalEventProducer;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class BiTemporalCollections {
+
     private static <T> ConcurrentSkipListBiTemporalCollection<T> createBiTemporalCollection(Collection<BiTemporalRecord<T>> temporalRecords) {
         SortedSet<BiTemporalRecord<T>> sorted = new TreeSet<>(temporalRecords);
 
@@ -16,6 +18,10 @@ public class BiTemporalCollections {
             collection.expireAsOf(r.businessEffective().end(), r.systemEffective().end());
         });
         return collection;
+    }
+
+    public static <T> BiTemporalCollection<T> emptyBiTemporalCollection() {
+        return createBiTemporalCollection(Collections.emptyList());
     }
 
     public static <T> BiTemporalCollection<T> immutableBiTemporalCollection(MutableBiTemporalCollection<T> collection) {
