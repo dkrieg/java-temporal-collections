@@ -22,7 +22,7 @@ public class TemporalCollections {
         return createTemporalCollection(Collections.emptyList());
     }
 
-    public static <T> TemporalCollection<T> immutableTemporalCollection(MutableTemporalCollection<T> collection) {
+    public static <T> TemporalCollection<T> immutableTemporalCollection(TemporalCollection<T> collection) {
         return new ImmutableTemporalCollection<>(collection);
     }
 

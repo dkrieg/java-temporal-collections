@@ -24,7 +24,7 @@ public class BiTemporalCollections {
         return createBiTemporalCollection(Collections.emptyList());
     }
 
-    public static <T> BiTemporalCollection<T> immutableBiTemporalCollection(MutableBiTemporalCollection<T> collection) {
+    public static <T> BiTemporalCollection<T> immutableBiTemporalCollection(BiTemporalCollection<T> collection) {
         return new ImmutableBiTemporalCollection<>(collection);
     }
 
